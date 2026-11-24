@@ -1,5 +1,5 @@
 /* Service worker: offline play. Network-first for same-origin files so updates arrive; cache as fallback. */
-var CACHE = 'sudoku-v2';
+var CACHE = 'sudoku-v3';
 var ASSETS = [
   './', 'index.html', 'style.css', 'core.js', 'i18n.js', 'config.js', 'app.js', 'online.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'
