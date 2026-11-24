@@ -198,3 +198,27 @@ h1, h2 { margin: 0; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (max-height: 640px) { .pad-btn { height: 46px; } .tool .ti { height: 34px; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* language dropdown */
+.lang-wrap { position: relative; }
+.chip .chev { width: 16px; height: 16px; color: var(--muted); margin-left: -2px; }
+.lang-menu { position: absolute; right: 0; top: 48px; min-width: 176px; background: var(--surface); border: 1px solid var(--card-bd); border-radius: 16px; padding: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, .35); z-index: 15; display: flex; flex-direction: column; gap: 2px; }
+.lang-menu[hidden] { display: none; }
+.lang-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px; border: 0; background: transparent; border-radius: 11px; font-size: 15px; font-weight: 600; text-align: left; }
+.lang-item.on { background: var(--accent-weak); }
+.lang-item .ic { width: 18px; height: 18px; color: var(--accent); }
+
+/* settings */
+.set-group { display: flex; flex-direction: column; gap: 12px; }
+.set-sep { height: 1px; background: var(--card-bd); }
+.set-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; cursor: pointer; }
+.sw-t b { display: block; font-size: 15px; font-weight: 600; }
+.sw-t small { display: block; color: var(--muted); font-size: 12px; margin-top: 1px; }
+input.sw { -webkit-appearance: none; appearance: none; width: 48px; height: 28px; border-radius: 14px; background: var(--line); position: relative; flex: none; margin: 0; transition: background .2s; cursor: pointer; }
+input.sw::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+input.sw:checked { background: var(--accent); }
+input.sw:checked::after { transform: translateX(20px); }
+.id-row { display: flex; align-items: center; gap: 10px; }
+.id-row .pid { margin-left: auto; font-size: 17px; }
+.btn.small { min-height: 36px; padding: 0 14px; font-size: 14px; border-radius: 10px; }
