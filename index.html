@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f4f6fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Sudoku</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+    <header class="top">
+      <h1 data-i18n="title">Sudoku</h1>
+      <div class="top-actions">
+        <button id="btn-lang" class="chip" type="button"></button>
+        <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings">⚙</button>
+      </div>
+    </header>
+    <div class="page">
+      <button id="btn-continue" class="btn primary big" type="button" hidden></button>
+      <div class="card">
+        <div class="card-title" data-i18n="newGame">New game</div>
+        <div class="row3">
+          <button class="btn diff" type="button" data-diff="easy" data-i18n="easy">Easy</button>
+          <button class="btn diff" type="button" data-diff="medium" data-i18n="medium">Medium</button>
+          <button class="btn diff" type="button" data-diff="hard" data-i18n="hard">Hard</button>
+        </div>
+      </div>
+      <button id="btn-daily" class="btn card-btn" type="button"><span class="cb-main" data-i18n="daily">Daily</span><small id="daily-sub"></small></button>
+      <button id="btn-online" class="btn card-btn" type="button"><span class="cb-main" data-i18n="online">Online</span><small>⚔</small></button>
+      <button id="btn-board" class="btn card-btn" type="button"><span class="cb-main" data-i18n="leaderboard">Leaderboard</span><small>🏆</small></button>
+      <div class="card">
+        <div class="card-title" data-i18n="stats">Stats</div>
+        <div id="stats-grid" class="stats-grid"></div>
+      </div>
+      <button id="btn-install" class="btn ghost" type="button" hidden data-i18n="install">Install</button>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section id="screen-game" class="screen">
+    <header class="game-top">
+      <button id="g-back" class="icon-btn" type="button" aria-label="Back">←</button>
+      <div class="g-title"><b id="g-title"></b></div>
+      <div class="g-time"><span id="g-timer">00:00</span><button id="g-pause" class="icon-btn small" type="button" aria-label="Pause">⏸</button></div>
+    </header>
+    <div id="battle-bar" hidden>
+      <div class="bb-row"><span data-i18n="you">You</span><div class="bar"><i id="bb-you"></i></div><b id="bb-you-pct">0%</b></div>
+      <div class="bb-row"><span data-i18n="opponent">Opponent</span><div class="bar opp"><i id="bb-opp"></i></div><b id="bb-opp-pct">0%</b></div>
+    </div>
+    <div class="g-stats"><span><span data-i18n="mistakes">Mistakes</span>: <b id="g-mist">0</b></span><span id="g-hintct"></span></div>
+    <div id="board-wrap">
+      <div id="board"></div>
+      <div id="pause-overlay" hidden><div class="po-box"><div class="po-title" data-i18n="paused">Paused</div><button id="btn-resume" class="btn primary" type="button" data-i18n="resume">Resume</button></div></div>
+    </div>
+    <div class="tools">
+      <button id="t-undo" class="tool" type="button"><span class="ti">↶</span><span data-i18n="undo">Undo</span></button>
+      <button id="t-erase" class="tool" type="button"><span class="ti">⌫</span><span data-i18n="erase">Erase</span></button>
+      <button id="t-notes" class="tool" type="button"><span class="ti">✎</span><span data-i18n="notes">Notes</span></button>
+      <button id="t-hint" class="tool" type="button"><span class="ti">💡</span><span data-i18n="hint">Hint</span></button>
+    </div>
+    <div id="pad" class="pad"></div>
+  </section>
+
+  <!-- ONLINE LOBBY -->
+  <section id="screen-online" class="screen">
+    <header class="top">
+      <button id="on-back" class="icon-btn" type="button" aria-label="Back">←</button>
+      <h2 data-i18n="online">Online</h2>
+      <span class="spacer"></span>
+    </header>
+    <div class="page">
+      <div id="on-notcfg" class="notice" hidden data-i18n="notConfigured"></div>
+      <div id="on-menu">
+        <div class="card">
+          <div class="card-title" data-i18n="createRoom">Create room</div>
+          <div class="seg" id="on-diffs">
+            <button type="button" data-od="easy" data-i18n="easy">Easy</button>
+            <button type="button" data-od="medium" class="on" data-i18n="medium">Medium</button>
+            <button type="button" data-od="hard" data-i18n="hard">Hard</button>
+          </div>
+          <button id="on-create" class="btn primary" type="button" data-i18n="createRoom">Create room</button>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="joinRoom">Join room</div>
+          <div class="row">
+            <input id="on-code" class="input code" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false" data-i18n-ph="enterCode" placeholder="Code">
+            <button id="on-join" class="btn primary" type="button" data-i18n="join">Join</button>
+          </div>
+        </div>
+      </div>
+      <div id="on-lobby" hidden>
+        <div class="card center">
+          <div class="muted" data-i18n="roomCode">Room code</div>
+          <div id="on-roomcode" class="bigcode"></div>
+          <div id="on-roomdiff" class="muted"></div>
+          <button id="on-copy" class="btn ghost" type="button" data-i18n="copyLink">Copy invite link</button>
+          <div id="on-status" class="status"></div>
+          <button id="on-start" class="btn primary" type="button" hidden data-i18n="start">Start</button>
+        </div>
+      </div>
+      <div id="on-msg" class="notice" hidden></div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section id="screen-board" class="screen">
+    <header class="top">
+      <button id="lb-back" class="icon-btn" type="button" aria-label="Back">←</button>
+      <h2 data-i18n="leaderboard">Leaderboard</h2>
+      <span class="spacer"></span>
+    </header>
+    <div class="page">
+      <div class="seg" id="lb-tabs">
+        <button type="button" data-lb="daily" class="on" data-i18n="today">Today</button>
+        <button type="button" data-lb="easy" data-i18n="easy">Easy</button>
+        <button type="button" data-lb="medium" data-i18n="medium">Medium</button>
+        <button type="button" data-lb="hard" data-i18n="hard">Hard</button>
+      </div>
+      <div id="lb-notcfg" class="notice" hidden data-i18n="notConfigured"></div>
+      <ol id="lb-list" class="lb-list"></ol>
+      <div class="card" id="lb-mine">
+        <div class="card-title" data-i18n="myBest">My best times</div>
+        <div id="lb-mine-grid" class="stats-grid"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SETTINGS -->
+<div id="modal-settings" class="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="sheet-head"><b data-i18n="settings">Settings</b><button id="set-close" class="icon-btn small" type="button" aria-label="Close">✕</button></div>
+    <div class="set-row"><div class="set-label" data-i18n="language">Language</div><div class="seg wrap" id="set-lang"></div></div>
+    <div class="set-row"><div class="set-label" data-i18n="theme">Theme</div>
+      <div class="seg" id="set-theme">
+        <button type="button" data-th="auto" data-i18n="auto">Auto</button>
+        <button type="button" data-th="light" data-i18n="light">Light</button>
+        <button type="button" data-th="dark" data-i18n="dark">Dark</button>
+      </div>
+    </div>
+    <label class="set-row inline"><span class="set-label" data-i18n="showErrors">Highlight mistakes</span><input id="set-errors" type="checkbox"></label>
+    <div class="set-row"><div class="set-label" data-i18n="yourName">Your name</div><input id="set-name" class="input" maxlength="20" autocomplete="nickname"></div>
+  </div>
+</div>
+
+<!-- GENERIC MODAL -->
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div id="modal-title" class="modal-title"></div>
+    <div id="modal-body" class="modal-body"></div>
+    <div id="modal-actions" class="modal-actions"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="core.js"></script>
+<script src="i18n.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+<script src="online.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
