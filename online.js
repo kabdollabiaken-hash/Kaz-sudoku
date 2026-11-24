@@ -146,6 +146,7 @@
         if (L.ch !== ch) return;
         if (status === 'SUBSCRIBED') {
           ch.track({ id: L.id, host: host, name: myName(), diff: L.diff });
+          if (host && window.Track) Track.log('battle_create', { mode: 'battle', diff: L.diff });
           setMsg(''); showPanel('lobby');
           $('#on-roomcode').textContent = code;
           $('#on-roomdiff').textContent = t('chooseDiff') + ': ' + t(L.diff);
@@ -197,6 +198,7 @@
       if (n <= 0) {
         clearInterval(L.cd); L.cd = null; setStatus('', false);
         L.inGame = true;
+        if (window.Track) Track.log('battle_start', { mode: 'battle', diff: p.diff });
         A.startBattleGame({
           seed: p.seed, diff: p.diff,
           onProgress: function (pct, mist) { send('progress', { id: L.id, pct: pct, mist: mist }); },
@@ -221,6 +223,7 @@
   function onMyDone(secs) {
     L.myDone = true; L.mySecs = secs;
     send('done', { id: L.id, secs: secs });
+    if (window.Track) Track.log('battle_win', { mode: 'battle', diff: L.diff, secs: secs });
     showResult(true, secs);
   }
   function onOppDone(p) {
