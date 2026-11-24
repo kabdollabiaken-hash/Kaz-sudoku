@@ -11,7 +11,16 @@
     del: function (k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
 
-  var settings = Object.assign({ theme: 'auto', showErrors: true, name: '' }, LS.get('sdk_settings', {}));
+  function newPlayerId() {
+    var al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = '';
+    for (var i = 0; i < 4; i++) s += al.charAt(Math.floor(Math.random() * al.length));
+    return 'Player-' + s;
+  }
+  var settings = Object.assign({ theme: 'dark', themeSet: false, showErrors: true, name: '', playerId: '' }, LS.get('sdk_settings', {}));
+  if (!settings.themeSet) settings.theme = 'dark';
+  if (!settings.playerId) { settings.playerId = newPlayerId(); LS.set('sdk_settings', settings); }
+  function displayName() { return (settings.name || '').trim().slice(0, 20) || settings.playerId; }
+  function ico(id, cls) { return '<svg class="ic ' + (cls || '') + '"><use href="#' + id + '"/></svg>'; }
   var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {} }, LS.get('sdk_stats', {}));
   function saveSettings() { LS.set('sdk_settings', settings); }
   function saveStats() { LS.set('sdk_stats', stats); }
@@ -61,7 +70,7 @@
   function applyTheme() {
     var th = settings.theme === 'auto' ? (mq && mq.matches ? 'dark' : 'light') : settings.theme;
     document.documentElement.setAttribute('data-theme', th);
-    var m = $('meta[name="theme-color"]'); if (m) m.setAttribute('content', th === 'dark' ? '#12151d' : '#f4f6fb');
+    var m = $('meta[name="theme-color"]'); if (m) m.setAttribute('content', th === 'dark' ? '#0c1020' : '#eef1f9');
   }
   if (mq && mq.addEventListener) mq.addEventListener('change', applyTheme);
 
@@ -79,24 +88,28 @@
     var today = C.dailySeed(), y = C.dailySeed(Date.now() - 86400000);
     return (stats.lastDaily === today || stats.lastDaily === y) ? stats.streak : 0;
   }
-  function statBox(label, value) {
-    var d = el('div', 'stat'); d.appendChild(el('b', '', value)); d.appendChild(el('span', '', label)); return d;
+  function statBox(label, value, icon, color) {
+    var d = el('div', 'stat');
+    if (icon) { d.innerHTML = ico(icon); d.firstChild.style.color = color || 'var(--muted)'; }
+    d.appendChild(el('b', '', value)); d.appendChild(el('span', '', label)); return d;
   }
   function renderHome() {
-    $('#btn-lang').textContent = I.LANGS.filter(function (l) { return l[0] === I.get(); })[0][1];
+    $('#lang-label').textContent = I.LANGS.filter(function (l) { return l[0] === I.get(); })[0][1];
     var sv = LS.get('sdk_save', null);
     var cont = $('#btn-continue');
     if (sv) {
       cont.hidden = false;
-      cont.textContent = t('continue') + ' · ' + (sv.mode === 'daily' ? t('daily') : t(sv.diff)) + ' · ' + fmt(Math.floor(sv.ms / 1000));
+      $('#cont-text').innerHTML = '<span class="g1">' + t('continueGame') + ' · ' + (sv.mode === 'daily' ? t('daily') : t(sv.diff)) + '</span><span class="g2">' + ico('i-timer') + fmt(Math.floor(sv.ms / 1000)) + '</span>';
     } else cont.hidden = true;
     var today = C.dailySeed();
-    $('#daily-sub').textContent = stats.dailyDone[today] !== undefined ? '✓ ' + fmt(stats.dailyDone[today]) : today;
+    var done = stats.dailyDone[today] !== undefined;
+    $('#daily-sub').textContent = today;
+    $('#daily-check').hidden = !done;
     var g = $('#stats-grid'); g.innerHTML = '';
     var total = stats.wins.easy + stats.wins.medium + stats.wins.hard;
-    g.appendChild(statBox(t('wins'), String(total)));
-    g.appendChild(statBox(t('streak'), String(computeStreak())));
-    g.appendChild(statBox(t('best') + ' · ' + t('medium'), stats.best.medium !== undefined ? fmt(stats.best.medium) : '–'));
+    g.appendChild(statBox(t('wins'), String(total), 'i-check', '#8fa3c8'));
+    g.appendChild(statBox(t('streak'), String(computeStreak()), 'i-flame', '#ff8a4c'));
+    g.appendChild(statBox(t('best') + ' · ' + t('medium'), stats.best.medium !== undefined ? fmt(stats.best.medium) : '00:00', 'i-timer', '#9aa5c0'));
     updateInstallBtn();
   }
   function renderMyBest(container) {
@@ -125,6 +138,8 @@
     if (G.sel === null) G.sel = firstEmpty(G);
     $('#battle-bar').hidden = G.mode !== 'battle';
     $('#g-pause').hidden = G.mode === 'battle';
+    $('#g-restart').hidden = G.mode === 'battle';
+    $('#g-pause').innerHTML = ico(G.paused ? 'i-play' : 'i-pause');
     $('#pause-overlay').hidden = !G.paused;
     setBattleBars(0, 0);
     show('game');
@@ -181,7 +196,7 @@
     if (!G || G.finished || G.mode === 'battle') return;
     tick(); G.paused = p;
     $('#pause-overlay').hidden = !p;
-    $('#g-pause').textContent = p ? '▶' : '⏸';
+    $('#g-pause').innerHTML = ico(p ? 'i-play' : 'i-pause');
     if (p) save();
   }
   document.addEventListener('visibilitychange', function () {
@@ -248,6 +263,16 @@
     G.hints++; G.sel = i;
     afterMove();
   }
+  function restart() {
+    if (!G || G.mode === 'battle') return;
+    if (!confirm(t('confirmRestart'))) return;
+    G.cur = G.puz.slice(); G.notes = new Array(81).fill(0); G.hist = [];
+    G.mist = 0; G.hints = 0; G.ms = 0; G.last = Date.now();
+    G.finished = false; G.paused = false; G.notesMode = false; G.sel = firstEmpty(G);
+    $('#pause-overlay').hidden = true;
+    $('#g-pause').innerHTML = ico('i-pause');
+    renderAll(); save();
+  }
   function isSolved() { for (var i = 0; i < 81; i++) if (G.cur[i] !== G.sol[i]) return false; return true; }
   function progressPct() {
     var total = 0, ok = 0;
@@ -292,23 +317,20 @@
     body.push(t('mistakes') + ': ' + G.mist + (G.hints ? ' · ' + t('hintsUsed') + ': ' + G.hints + ' (+' + (30 * G.hints) + 's)' : ''));
     var canSubmit = counts && window.Online && window.Online.configured();
     if (canSubmit) {
-      var row = el('div', 'row');
-      var inp = el('input', 'input'); inp.maxLength = 20; inp.placeholder = t('yourName'); inp.value = settings.name || '';
-      var btn = el('button', 'btn primary', t('submit')); btn.type = 'button';
-      row.appendChild(inp); row.appendChild(btn); body.push(row);
       var msg = el('p', '', '');
-      body.push(msg);
+      var retry = el('button', 'btn ghost', t('submit')); retry.type = 'button'; retry.hidden = true;
+      body.push(msg); body.push(retry);
       var dayVal = (G.mode === 'daily' && G.seed === C.dailySeed()) ? G.seed : null;
       var modeVal = dayVal ? 'daily' : 'solo';
-      var diffVal = G.diff, scoreVal = G.score;
-      btn.onclick = function () {
-        var name = inp.value.trim().slice(0, 20); if (!name) { inp.focus(); return; }
-        settings.name = name; saveSettings(); btn.disabled = true; msg.textContent = t('loading');
+      var diffVal = G.diff, scoreVal = G.score, name = displayName();
+      var send = function () {
+        retry.hidden = true; msg.textContent = t('loading');
         window.Online.submitScore({ mode: modeVal, diff: diffVal, day: dayVal, name: name, secs: scoreVal }).then(function (r) {
-          msg.textContent = (r === 'ok' || r === 'dup') ? '✓ ' + t('submitted') : t('submitFail');
-          if (r !== 'ok' && r !== 'dup') btn.disabled = false;
+          if (r === 'ok' || r === 'dup') msg.textContent = '✓ ' + t('submitted') + ' · ' + name;
+          else { msg.textContent = t('submitFail'); retry.hidden = false; }
         });
       };
+      retry.onclick = send; send();
     }
     var d = G.diff, mode = G.mode;
     var buttons = [{ label: t('home'), cls: 'ghost', onClick: function () { show('home'); } }];
@@ -396,11 +418,12 @@
     $$('#set-theme button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-th') === settings.theme); });
     $('#set-errors').checked = !!settings.showErrors;
     $('#set-name').value = settings.name || '';
+    $('#set-name').placeholder = settings.playerId;
+    $('#set-pid').textContent = settings.playerId;
   }
   function setLang(l) {
     I.set(l); I.apply(); renderHome(); if (G) renderAll();
     if (window.Online && window.Online.refresh) window.Online.refresh();
-    $('#set-name').placeholder = t('yourName');
   }
 
   /* ---------- install ---------- */
@@ -444,7 +467,7 @@
     $('#set-close').addEventListener('click', function () { $('#modal-settings').classList.remove('open'); });
     $('#modal-settings').addEventListener('click', function (e) { if (e.target.id === 'modal-settings') e.target.classList.remove('open'); });
     $$('#set-theme button').forEach(function (b) {
-      b.addEventListener('click', function () { settings.theme = b.getAttribute('data-th'); saveSettings(); applyTheme(); renderSettings(); });
+      b.addEventListener('click', function () { settings.theme = b.getAttribute('data-th'); settings.themeSet = true; saveSettings(); applyTheme(); renderSettings(); });
     });
     $('#set-errors').addEventListener('change', function (e) { settings.showErrors = e.target.checked; saveSettings(); if (G) renderAll(); });
     $('#set-name').addEventListener('input', function (e) { settings.name = e.target.value.slice(0, 20); saveSettings(); });
@@ -463,6 +486,8 @@
       save(); show('home');
     });
     $('#g-pause').addEventListener('click', function () { setPaused(!G.paused); });
+    $('#g-restart').addEventListener('click', restart);
+    $('#btn-restart').addEventListener('click', restart);
     $('#btn-resume').addEventListener('click', function () { setPaused(false); });
     $('#t-undo').addEventListener('click', undo);
     $('#t-erase').addEventListener('click', function () { input(0); });
@@ -494,6 +519,7 @@
     setOppProgress: function (p) { setBattleBars(null, p); },
     freeze: function () { if (G) { tick(); G.finished = true; renderAll(); } },
     getSettings: function () { return settings; },
+    displayName: displayName,
     saveSettings: saveSettings,
     renderMyBest: renderMyBest,
     getConfig: function () { return window.SUDOKU_CONFIG || {}; }
