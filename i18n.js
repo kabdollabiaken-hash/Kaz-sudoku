@@ -79,6 +79,10 @@
       chooseDiff: 'Difficulty', leave: 'Leave', ok: 'OK', cancel: 'Cancel', online2: 'Online', myBest: 'My best times'
     }
   };
+  Object.assign(T.kk, { restart: 'Қайта бастау', confirmRestart: 'Ағымдағы прогресс өшіріледі. Қайта бастаймыз ба?', continueGame: 'Жалғастыру', goOn: 'Ары қарай', nickname: 'Лақап ат (міндетті емес)', playerId: 'Ойыншы ID' });
+  Object.assign(T.ru, { restart: 'Заново', confirmRestart: 'Прогресс будет сброшен. Начать заново?', continueGame: 'Продолжить игру', goOn: 'Далее', nickname: 'Ник (необязательно)', playerId: 'ID игрока' });
+  Object.assign(T.zh, { restart: '重新开始', confirmRestart: '当前进度将清空，重新开始吗？', continueGame: '继续游戏', goOn: '继续', nickname: '昵称（可选）', playerId: '玩家 ID' });
+  Object.assign(T.en, { restart: 'Restart', confirmRestart: 'Progress will be reset. Restart?', continueGame: 'Continue game', goOn: 'Resume', nickname: 'Nickname (optional)', playerId: 'Player ID' });
   var LANGS = [['kk', 'Қазақша'], ['ru', 'Русский'], ['zh', '中文'], ['en', 'English']];
   var cur = 'en';
 
