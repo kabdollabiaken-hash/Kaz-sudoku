@@ -16,7 +16,7 @@
     for (var i = 0; i < 4; i++) s += al.charAt(Math.floor(Math.random() * al.length));
     return 'Player-' + s;
   }
-  var settings = Object.assign({ theme: 'dark', themeSet: false, showErrors: true, name: '', playerId: '' }, LS.get('sdk_settings', {}));
+  var settings = Object.assign({ theme: 'dark', themeSet: false, showErrors: true, highlightSame: true, autoNotes: true, showTimer: true, name: '', playerId: '' }, LS.get('sdk_settings', {}));
   if (!settings.themeSet) settings.theme = 'dark';
   if (!settings.playerId) { settings.playerId = newPlayerId(); LS.set('sdk_settings', settings); }
   function displayName() { return (settings.name || '').trim().slice(0, 20) || settings.playerId; }
@@ -93,6 +93,22 @@
     if (icon) { d.innerHTML = ico(icon); d.firstChild.style.color = color || 'var(--muted)'; }
     d.appendChild(el('b', '', value)); d.appendChild(el('span', '', label)); return d;
   }
+  function buildLangMenu() {
+    var m = $('#lang-menu'); m.innerHTML = '';
+    I.LANGS.forEach(function (l) {
+      var on = l[0] === I.get();
+      var b = el('button', 'lang-item' + (on ? ' on' : ''), ''); b.type = 'button'; b.setAttribute('role', 'option');
+      b.innerHTML = '<span>' + l[1] + '</span>' + (on ? ico('i-check') : '');
+      b.onclick = function () { closeLangMenu(); if (!on) setLang(l[0]); };
+      m.appendChild(b);
+    });
+  }
+  function closeLangMenu() { var m = $('#lang-menu'); if (m && !m.hidden) { m.hidden = true; $('#btn-lang').setAttribute('aria-expanded', 'false'); } }
+  function toggleLangMenu() {
+    var m = $('#lang-menu'), open = m.hidden;
+    if (open) buildLangMenu();
+    m.hidden = !open; $('#btn-lang').setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
   function renderHome() {
     $('#lang-label').textContent = I.LANGS.filter(function (l) { return l[0] === I.get(); })[0][1];
     var sv = LS.get('sdk_save', null);
@@ -110,6 +126,7 @@
     g.appendChild(statBox(t('wins'), String(total), 'i-check', '#8fa3c8'));
     g.appendChild(statBox(t('streak'), String(computeStreak()), 'i-flame', '#ff8a4c'));
     g.appendChild(statBox(t('best') + ' · ' + t('medium'), stats.best.medium !== undefined ? fmt(stats.best.medium) : '00:00', 'i-timer', '#9aa5c0'));
+    buildLangMenu();
     updateInstallBtn();
   }
   function renderMyBest(container) {
@@ -216,7 +233,7 @@
     ch.push([i, G.cur[i], G.notes[i]]);
     G.cur[i] = v; G.notes[i] = 0;
     if (v && !force && v !== G.sol[i]) G.mist++;
-    if (v) {
+    if (v && settings.autoNotes) {
       var bit = 1 << (v - 1);
       peersOf(i, function (p) {
         if (G.notes[p] & bit) { ch.push([p, G.cur[p], G.notes[p]]); G.notes[p] &= ~bit; }
@@ -378,7 +395,7 @@
       if (sel !== null) {
         if (i === sel) cls += ' sel';
         else if (C.ROW[i] === C.ROW[sel] || C.COL[i] === C.COL[sel] || C.BOX[i] === C.BOX[sel]) cls += ' peer';
-        if (i !== sel && selVal && v === selVal) cls += ' same';
+        if (i !== sel && selVal && v === selVal && settings.highlightSame) cls += ' same';
       }
       if (settings.showErrors && v && !G.puz[i] && v !== G.sol[i]) cls += ' err';
       if (v && v === G.sol[i]) counts[v]++;
@@ -399,6 +416,7 @@
     $('#t-notes').classList.toggle('on', G.notesMode);
     $('#t-undo').disabled = !G.hist.length;
     $('#t-hint').disabled = G.mode === 'battle';
+    $('#g-timer').hidden = !settings.showTimer;
     $('#g-timer').textContent = fmt(Math.floor(G.ms / 1000));
   }
 
@@ -409,14 +427,11 @@
 
   /* ---------- settings ---------- */
   function renderSettings() {
-    var lg = $('#set-lang'); lg.innerHTML = '';
-    I.LANGS.forEach(function (l) {
-      var b = el('button', l[0] === I.get() ? 'on' : '', l[1]); b.type = 'button';
-      b.onclick = function () { setLang(l[0]); renderSettings(); };
-      lg.appendChild(b);
-    });
     $$('#set-theme button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-th') === settings.theme); });
     $('#set-errors').checked = !!settings.showErrors;
+    $('#set-same').checked = !!settings.highlightSame;
+    $('#set-autonotes').checked = !!settings.autoNotes;
+    $('#set-timer').checked = !!settings.showTimer;
     $('#set-name').value = settings.name || '';
     $('#set-name').placeholder = settings.playerId;
     $('#set-pid').textContent = settings.playerId;
@@ -459,10 +474,10 @@
     $('#btn-online').addEventListener('click', function () { show('online'); if (window.Online) window.Online.openLobby(); });
     $('#btn-board').addEventListener('click', function () { show('board'); });
     $('#lb-back').addEventListener('click', function () { show('home'); });
-    $('#btn-lang').addEventListener('click', function () {
-      var idx = 0; I.LANGS.forEach(function (l, k) { if (l[0] === I.get()) idx = k; });
-      setLang(I.LANGS[(idx + 1) % I.LANGS.length][0]);
-    });
+    $('#btn-lang').addEventListener('click', function (e) { e.stopPropagation(); toggleLangMenu(); });
+    $('#lang-menu').addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', closeLangMenu);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLangMenu(); });
     $('#btn-settings').addEventListener('click', function () { renderSettings(); $('#modal-settings').classList.add('open'); });
     $('#set-close').addEventListener('click', function () { $('#modal-settings').classList.remove('open'); });
     $('#modal-settings').addEventListener('click', function (e) { if (e.target.id === 'modal-settings') e.target.classList.remove('open'); });
@@ -470,6 +485,15 @@
       b.addEventListener('click', function () { settings.theme = b.getAttribute('data-th'); settings.themeSet = true; saveSettings(); applyTheme(); renderSettings(); });
     });
     $('#set-errors').addEventListener('change', function (e) { settings.showErrors = e.target.checked; saveSettings(); if (G) renderAll(); });
+    $('#set-same').addEventListener('change', function (e) { settings.highlightSame = e.target.checked; saveSettings(); if (G) renderAll(); });
+    $('#set-autonotes').addEventListener('change', function (e) { settings.autoNotes = e.target.checked; saveSettings(); });
+    $('#set-timer').addEventListener('change', function (e) { settings.showTimer = e.target.checked; saveSettings(); if (G) renderAll(); });
+    $('#set-copy').addEventListener('click', function () {
+      var id = settings.playerId;
+      function ok() { toast(t('copied') + ': ' + id); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(id).then(ok, function () { window.prompt(t('playerId'), id); });
+      else window.prompt(t('playerId'), id);
+    });
     $('#set-name').addEventListener('input', function (e) { settings.name = e.target.value.slice(0, 20); saveSettings(); });
     $('#btn-install').addEventListener('click', function () {
       if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(function () { deferredPrompt = null; updateInstallBtn(); }); }
