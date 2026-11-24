@@ -83,6 +83,10 @@
   Object.assign(T.ru, { restart: 'Заново', confirmRestart: 'Прогресс будет сброшен. Начать заново?', continueGame: 'Продолжить игру', goOn: 'Далее', nickname: 'Ник (необязательно)', playerId: 'ID игрока' });
   Object.assign(T.zh, { restart: '重新开始', confirmRestart: '当前进度将清空，重新开始吗？', continueGame: '继续游戏', goOn: '继续', nickname: '昵称（可选）', playerId: '玩家 ID' });
   Object.assign(T.en, { restart: 'Restart', confirmRestart: 'Progress will be reset. Restart?', continueGame: 'Continue game', goOn: 'Resume', nickname: 'Nickname (optional)', playerId: 'Player ID' });
+  Object.assign(T.kk, { gameAssist: 'Ойын көмекшісі', highlightSame: 'Бірдей сандарды бөлектеу', autoNotes: 'Жазбаларды автотазалау', showTimer: 'Таймерді көрсету', battleId: 'Жарыс профилі', copy: 'Көшіру', showErrorsD: 'Қате сандар қызылмен', highlightSameD: 'Таңдағанда бірдей сандар бөлектеледі', autoNotesD: 'Жүрістен кейін байланысты жазбаларды өшіру', showTimerD: 'Ойын уақытын көрсету' });
+  Object.assign(T.ru, { gameAssist: 'Помощь в игре', highlightSame: 'Подсвечивать одинаковые цифры', autoNotes: 'Автоочистка заметок', showTimer: 'Показывать таймер', battleId: 'Профиль для дуэлей', copy: 'Копировать', showErrorsD: 'Неверные цифры красным', highlightSameD: 'Подсветка таких же цифр при выборе', autoNotesD: 'Убирать связанные заметки после хода', showTimerD: 'Время партии на экране' });
+  Object.assign(T.zh, { gameAssist: '游戏辅助', highlightSame: '相同数字高亮', autoNotes: '自动清除草稿', showTimer: '显示计时器', battleId: '对战身份', copy: '复制', showErrorsD: '填错时标红提示', highlightSameD: '选中数字时关联提示', autoNotesD: '落子后清理同区笔记', showTimerD: '对局中展示耗时' });
+  Object.assign(T.en, { gameAssist: 'Game assist', highlightSame: 'Highlight same digits', autoNotes: 'Auto-clear notes', showTimer: 'Show timer', battleId: 'Battle identity', copy: 'Copy', showErrorsD: 'Mark wrong digits in red', highlightSameD: 'Highlight matching digits on select', autoNotesD: 'Clear related notes after a move', showTimerD: 'Show elapsed time in game' });
   var LANGS = [['kk', 'Қазақша'], ['ru', 'Русский'], ['zh', '中文'], ['en', 'English']];
   var cur = 'en';
 
