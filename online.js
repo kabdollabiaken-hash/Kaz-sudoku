@@ -85,7 +85,7 @@
   var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function randomCode() { var s = ''; for (var i = 0; i < 5; i++) s += ALPHA.charAt(Math.floor(Math.random() * ALPHA.length)); return s; }
   function randomId() { return Math.random().toString(36).slice(2, 10); }
-  function myName() { return (A.getSettings().name || '').trim() || t('you'); }
+  function myName() { return A.displayName(); }
 
   function setMsg(text) { var m = $('#on-msg'); m.hidden = !text; m.textContent = text || ''; }
   function showPanel(which) { $('#on-menu').hidden = which !== 'menu'; $('#on-lobby').hidden = which !== 'lobby'; }
