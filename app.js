@@ -22,6 +22,7 @@
   function displayName() { return (settings.name || '').trim().slice(0, 20) || settings.playerId; }
   function ico(id, cls) { return '<svg class="ic ' + (cls || '') + '"><use href="#' + id + '"/></svg>'; }
   var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {} }, LS.get('sdk_stats', {}));
+  if (stats.sz !== 2) { stats.sz = 2; stats.best = {}; stats.wins = { easy: 0, medium: 0, hard: 0 }; LS.set('sdk_stats', stats); LS.del('sdk_save'); }
   function saveSettings() { LS.set('sdk_settings', settings); }
   function saveStats() { LS.set('sdk_stats', stats); }
 
@@ -142,13 +143,13 @@
     var g = {
       mode: mode, diff: diff, seed: seed,
       puz: gen.puzzle.split('').map(Number), sol: gen.solution.split('').map(Number),
-      notes: new Array(81).fill(0), hist: [], sel: null, notesMode: false,
+      n: gen.n, geo: C.geom(gen.n), notes: new Array(gen.n * gen.n).fill(0), hist: [], sel: null, notesMode: false,
       mist: 0, hints: 0, ms: 0, last: Date.now(), finished: false, paused: false, replay: false
     };
     g.cur = g.puz.slice();
     return g;
   }
-  function firstEmpty(g) { for (var i = 0; i < 81; i++) if (!g.puz[i]) return i; return null; }
+  function firstEmpty(g) { for (var i = 0; i < g.n * g.n; i++) if (!g.puz[i]) return i; return null; }
 
   function enterGame(g) {
     G = g; G.last = Date.now();
@@ -167,11 +168,13 @@
     var seed = C.randomSeed();
     var g = makeGame('solo', diff, seed);
     enterGame(g); save();
+    if (window.Track) Track.log('start', { mode: 'solo', diff: diff });
   }
   function startDaily(replay) {
     var g = makeGame('daily', 'medium', C.dailySeed());
     g.replay = !!replay;
     enterGame(g); save();
+    if (window.Track && !replay) Track.log('start', { mode: 'daily', diff: 'medium' });
   }
   function startBattleGame(o) {
     var g = makeGame('battle', o.diff, o.seed);
@@ -183,12 +186,12 @@
     if (!G || G.finished || G.mode === 'battle') return;
     tick();
     LS.set('sdk_save', {
-      mode: G.mode, diff: G.diff, seed: G.seed, cur: G.cur.join(''), notes: G.notes,
+      v: 2, mode: G.mode, diff: G.diff, seed: G.seed, cur: G.cur.join(''), notes: G.notes,
       mist: G.mist, hints: G.hints, ms: G.ms, replay: G.replay
     });
   }
   function loadSave() {
-    var s = LS.get('sdk_save', null); if (!s) return;
+    var s = LS.get('sdk_save', null); if (!s || s.v !== 2) { LS.del('sdk_save'); return; }
     var g = makeGame(s.mode, s.diff, s.seed);
     g.cur = String(s.cur).split('').map(Number);
     g.notes = s.notes || g.notes; g.mist = s.mist || 0; g.hints = s.hints || 0; g.ms = s.ms || 0; g.replay = !!s.replay;
@@ -224,8 +227,9 @@
 
   /* moves */
   function peersOf(i, fn) {
-    for (var p = 0; p < 81; p++) {
-      if (p !== i && (C.ROW[p] === C.ROW[i] || C.COL[p] === C.COL[i] || C.BOX[p] === C.BOX[i])) fn(p);
+    var geo = G.geo;
+    for (var p = 0; p < G.n * G.n; p++) {
+      if (p !== i && (geo.ROW[p] === geo.ROW[i] || geo.COL[p] === geo.COL[i] || geo.BOX[p] === geo.BOX[i])) fn(p);
     }
   }
   function place(i, v, force) {
@@ -246,7 +250,7 @@
   function input(v) {
     if (!G || G.finished || G.paused || G.sel === null) return;
     var i = G.sel;
-    if (G.puz[i]) return;
+    if (G.puz[i] || v > G.n) return;
     if (v === 0) {
       if (G.cur[i] === 0 && G.notes[i] === 0) return;
       pushHist([[i, G.cur[i], G.notes[i]]]); G.cur[i] = 0; G.notes[i] = 0;
@@ -272,7 +276,7 @@
     var i = G.sel;
     if (i === null || G.puz[i] || G.cur[i] === G.sol[i]) {
       var cand = [];
-      for (var k = 0; k < 81; k++) if (!G.puz[k] && G.cur[k] !== G.sol[k]) cand.push(k);
+      for (var k = 0; k < G.n * G.n; k++) if (!G.puz[k] && G.cur[k] !== G.sol[k]) cand.push(k);
       if (!cand.length) return;
       i = cand[Math.floor(Math.random() * cand.length)];
     }
@@ -283,17 +287,17 @@
   function restart() {
     if (!G || G.mode === 'battle') return;
     if (!confirm(t('confirmRestart'))) return;
-    G.cur = G.puz.slice(); G.notes = new Array(81).fill(0); G.hist = [];
+    G.cur = G.puz.slice(); G.notes = new Array(G.n * G.n).fill(0); G.hist = [];
     G.mist = 0; G.hints = 0; G.ms = 0; G.last = Date.now();
     G.finished = false; G.paused = false; G.notesMode = false; G.sel = firstEmpty(G);
     $('#pause-overlay').hidden = true;
     $('#g-pause').innerHTML = ico('i-pause');
     renderAll(); save();
   }
-  function isSolved() { for (var i = 0; i < 81; i++) if (G.cur[i] !== G.sol[i]) return false; return true; }
+  function isSolved() { for (var i = 0; i < G.n * G.n; i++) if (G.cur[i] !== G.sol[i]) return false; return true; }
   function progressPct() {
     var total = 0, ok = 0;
-    for (var i = 0; i < 81; i++) if (!G.puz[i]) { total++; if (G.cur[i] === G.sol[i]) ok++; }
+    for (var i = 0; i < G.n * G.n; i++) if (!G.puz[i]) { total++; if (G.cur[i] === G.sol[i]) ok++; }
     return total ? Math.round(ok * 100 / total) : 100;
   }
   function afterMove(noWinCheck) {
@@ -325,6 +329,7 @@
       }
       saveStats();
     }
+    if (counts && window.Track) Track.log('finish', { mode: G.mode, diff: G.diff, secs: G.score });
     showWin(counts);
   }
 
@@ -356,30 +361,45 @@
   }
 
   /* ---------- rendering ---------- */
-  function buildBoard() {
-    var b = $('#board');
-    for (var i = 0; i < 81; i++) {
+  var builtN = 0;
+  function bcls(geo, i) {
+    var r = geo.ROW[i], c = geo.COL[i], n = geo.n;
+    return 'cell' + ((c + 1) % geo.bc === 0 && c !== n - 1 ? ' bR' : '') + ((r + 1) % geo.br === 0 && r !== n - 1 ? ' bB' : '');
+  }
+  function buildBoard(n) {
+    if (builtN === n) return;
+    builtN = n;
+    var geo = C.geom(n), b = $('#board'), nc = n === 4 ? 2 : 3, nr = n === 4 ? 2 : (n === 6 ? 2 : 3);
+    b.innerHTML = ''; cells = [];
+    b.style.setProperty('--n', n);
+    b.setAttribute('data-n', n);
+    var notesHtml = '<span class="n" style="grid-template-columns:repeat(' + nc + ',1fr);grid-template-rows:repeat(' + nr + ',1fr)">';
+    for (var k = 0; k < n; k++) notesHtml += '<i></i>';
+    notesHtml += '</span>';
+    for (var i = 0; i < n * n; i++) {
       var d = document.createElement('div');
-      var r = C.ROW[i], c = C.COL[i];
-      d.className = 'cell' + (c % 3 === 2 && c !== 8 ? ' bR' : '') + (r % 3 === 2 && r !== 8 ? ' bB' : '');
+      d.className = bcls(geo, i);
       d.setAttribute('data-i', i);
-      d.innerHTML = '<span class="v"></span><span class="n"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
+      d.innerHTML = '<span class="v"></span>' + notesHtml;
       b.appendChild(d);
       cells.push({ el: d, v: d.firstChild, ns: d.lastChild.children });
     }
-    b.addEventListener('click', function (e) {
+    var pad = $('#pad');
+    pad.innerHTML = ''; pad.style.setProperty('--n', n);
+    for (var q = 1; q <= n; q++) {
+      var bt = document.createElement('button');
+      bt.type = 'button'; bt.className = 'pad-btn'; bt.setAttribute('data-n', q);
+      bt.innerHTML = '<span class="d">' + q + '</span><span class="r"></span>';
+      pad.appendChild(bt);
+    }
+  }
+  function bindBoard() {
+    $('#board').addEventListener('click', function (e) {
       var c = e.target.closest ? e.target.closest('.cell') : null;
       if (!c || !G || G.paused) return;
       G.sel = +c.getAttribute('data-i'); renderAll();
     });
-    var pad = $('#pad');
-    for (var n = 1; n <= 9; n++) {
-      var bt = document.createElement('button');
-      bt.type = 'button'; bt.className = 'pad-btn'; bt.setAttribute('data-n', n);
-      bt.innerHTML = '<span class="d">' + n + '</span><span class="r"></span>';
-      pad.appendChild(bt);
-    }
-    pad.addEventListener('click', function (e) {
+    $('#pad').addEventListener('click', function (e) {
       var b2 = e.target.closest ? e.target.closest('.pad-btn') : null;
       if (b2 && !b2.disabled) input(+b2.getAttribute('data-n'));
     });
@@ -387,14 +407,16 @@
 
   function renderAll() {
     if (!G) return;
+    buildBoard(G.n);
+    var geo = G.geo, n = G.n;
     var sel = G.sel, selVal = sel !== null ? G.cur[sel] : 0;
     var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for (var i = 0; i < 81; i++) {
-      var c = cells[i], v = G.cur[i], cls = 'cell' + (C.COL[i] % 3 === 2 && C.COL[i] !== 8 ? ' bR' : '') + (C.ROW[i] % 3 === 2 && C.ROW[i] !== 8 ? ' bB' : '');
+    for (var i = 0; i < n * n; i++) {
+      var c = cells[i], v = G.cur[i], cls = bcls(geo, i);
       if (G.puz[i]) cls += ' given';
       if (sel !== null) {
         if (i === sel) cls += ' sel';
-        else if (C.ROW[i] === C.ROW[sel] || C.COL[i] === C.COL[sel] || C.BOX[i] === C.BOX[sel]) cls += ' peer';
+        else if (geo.ROW[i] === geo.ROW[sel] || geo.COL[i] === geo.COL[sel] || geo.BOX[i] === geo.BOX[sel]) cls += ' peer';
         if (i !== sel && selVal && v === selVal && settings.highlightSame) cls += ' same';
       }
       if (settings.showErrors && v && !G.puz[i] && v !== G.sol[i]) cls += ' err';
@@ -402,13 +424,13 @@
       c.el.className = cls;
       c.v.textContent = v ? v : '';
       var nm = v ? 0 : G.notes[i];
-      for (var k = 0; k < 9; k++) c.ns[k].textContent = (nm >> k) & 1 ? k + 1 : '';
+      for (var k = 0; k < n; k++) c.ns[k].textContent = (nm >> k) & 1 ? k + 1 : '';
     }
     var pads = $$('.pad-btn');
-    for (var n = 1; n <= 9; n++) {
-      var rem = 9 - counts[n];
-      pads[n - 1].querySelector('.r').textContent = rem > 0 ? rem : '';
-      pads[n - 1].disabled = rem <= 0 || G.finished;
+    for (var q = 1; q <= n; q++) {
+      var rem = n - counts[q];
+      pads[q - 1].querySelector('.r').textContent = rem > 0 ? rem : '';
+      pads[q - 1].disabled = rem <= 0 || G.finished;
     }
     $('#g-mist').textContent = G.mist;
     $('#g-hintct').textContent = G.mode === 'battle' ? '' : t('hint') + ': ' + G.hints;
@@ -446,7 +468,7 @@
   function isStandalone() { return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true; }
   function updateInstallBtn() { $('#btn-install').hidden = isStandalone() || !(deferredPrompt || isIOS); }
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; updateInstallBtn(); });
-  window.addEventListener('appinstalled', function () { deferredPrompt = null; updateInstallBtn(); });
+  window.addEventListener('appinstalled', function () { deferredPrompt = null; updateInstallBtn(); if (window.Track) Track.log('install'); });
 
   /* ---------- events ---------- */
   function bind() {
@@ -520,18 +542,18 @@
 
     document.addEventListener('keydown', function (e) {
       if (current !== 'game' || !G || e.target.tagName === 'INPUT') return;
-      if (e.key >= '1' && e.key <= '9') { input(+e.key); e.preventDefault(); }
+      if (e.key >= '1' && e.key <= String(G.n)) { input(+e.key); e.preventDefault(); }
       else if (e.key === '0' || e.key === 'Backspace' || e.key === 'Delete') { input(0); e.preventDefault(); }
       else if (e.key === 'n' || e.key === 'N') { G.notesMode = !G.notesMode; renderAll(); }
       else if (e.key === 'h' || e.key === 'H') hint();
       else if (e.key === 'z' || e.key === 'Z') undo();
       else if (e.key.indexOf('Arrow') === 0 && G.sel !== null && !G.paused) {
-        var r = C.ROW[G.sel], c = C.COL[G.sel];
+        var r = G.geo.ROW[G.sel], c = G.geo.COL[G.sel], mx = G.n - 1;
         if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
-        if (e.key === 'ArrowDown') r = Math.min(8, r + 1);
+        if (e.key === 'ArrowDown') r = Math.min(mx, r + 1);
         if (e.key === 'ArrowLeft') c = Math.max(0, c - 1);
-        if (e.key === 'ArrowRight') c = Math.min(8, c + 1);
-        G.sel = r * 9 + c; renderAll(); e.preventDefault();
+        if (e.key === 'ArrowRight') c = Math.min(mx, c + 1);
+        G.sel = r * G.n + c; renderAll(); e.preventDefault();
       }
     });
   }
@@ -550,5 +572,6 @@
   };
 
   /* ---------- init ---------- */
-  buildBoard(); bind(); applyTheme(); I.apply(); renderHome();
+  bindBoard(); bind(); applyTheme(); I.apply(); renderHome();
+  if (window.Track) Track.open();
 })();
