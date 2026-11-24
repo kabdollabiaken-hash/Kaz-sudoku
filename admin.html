@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0c1020">
+<title>数独后台</title>
+<style>
+:root { --bg:#0c1020; --card:#151b2e; --bd:rgba(255,255,255,.09); --text:#e9ecf6; --muted:#8d96b0; --accent:#7b8cff; --accent2:#ff9f43; --good:#45c488; --bad:#ff6b70; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","PingFang SC","Microsoft YaHei",sans-serif; }
+body { background-image: radial-gradient(520px 320px at 10% 0%, rgba(99,102,241,.2), transparent 65%); min-height:100vh; }
+.wrap { max-width:760px; margin:0 auto; padding:max(14px,env(safe-area-inset-top)) 14px 40px; }
+[hidden] { display:none !important; }
+h1 { font-size:22px; margin:0; }
+h2 { font-size:15px; margin:0 0 10px; color:var(--muted); font-weight:600; }
+.top { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+.tools { display:flex; gap:8px; align-items:center; }
+button, select, input { font:inherit; color:inherit; }
+.btn { border:1px solid var(--bd); background:var(--card); border-radius:10px; padding:8px 14px; cursor:pointer; font-weight:600; }
+.btn.primary { background:var(--accent); color:#0c1020; border-color:transparent; }
+select.btn { appearance:none; -webkit-appearance:none; padding-right:12px; }
+.muted { color:var(--muted); font-size:13px; }
+.card { background:var(--card); border:1px solid var(--bd); border-radius:16px; padding:14px; margin-top:12px; }
+.kpis { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:12px; }
+@media (min-width:560px) { .kpis { grid-template-columns:repeat(3,1fr); } }
+.kpi { background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:12px 14px; }
+.kpi .l { font-size:12px; color:var(--muted); }
+.kpi .v { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; margin-top:2px; }
+.kpi .s { font-size:11px; color:var(--muted); margin-top:2px; min-height:14px; }
+table { width:100%; border-collapse:collapse; font-size:14px; }
+th, td { text-align:right; padding:8px 4px; border-bottom:1px solid var(--bd); font-variant-numeric:tabular-nums; }
+th:first-child, td:first-child { text-align:left; }
+th { color:var(--muted); font-weight:600; font-size:12px; }
+tr:last-child td { border-bottom:0; }
+.bars { display:flex; flex-direction:column; gap:8px; }
+.brow { display:grid; grid-template-columns:78px 1fr 44px; align-items:center; gap:8px; font-size:14px; }
+.brow .t { height:10px; background:rgba(255,255,255,.07); border-radius:5px; overflow:hidden; }
+.brow .t i { display:block; height:100%; background:var(--accent); border-radius:5px; }
+.brow .n { text-align:right; font-variant-numeric:tabular-nums; }
+.legend { display:flex; gap:14px; font-size:12px; color:var(--muted); margin-bottom:6px; }
+.legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+svg.chart { width:100%; height:auto; display:block; }
+.login { max-width:380px; margin:12vh auto 0; }
+.login input[type=password], .login input[type=text] { width:100%; height:48px; border-radius:12px; border:1.5px solid rgba(255,255,255,.18); background:transparent; padding:0 14px; font-size:16px; margin:12px 0 8px; }
+.err { color:var(--bad); font-size:14px; min-height:20px; margin:4px 0; }
+.two { display:grid; grid-template-columns:1fr; gap:0; }
+@media (min-width:560px) { .two { grid-template-columns:1fr 1fr; gap:12px; } }
+.note { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5; }
+.good { color:var(--good); } .bad { color:var(--bad); }
+</style>
+</head>
+<body>
+
+<div id="login" class="wrap" hidden>
+  <div class="card login">
+    <h1>数独后台</h1>
+    <div class="muted" style="margin-top:4px">请输入管理员密码</div>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="密码">
+    <label class="muted"><input id="remember" type="checkbox"> 在此设备记住密码</label>
+    <div id="lerr" class="err"></div>
+    <button id="go" class="btn primary" style="width:100%;height:46px">登录</button>
+  </div>
+</div>
+
+<div id="dash" class="wrap" hidden>
+  <div class="top">
+    <h1>数独后台</h1>
+    <div class="tools">
+      <select id="range" class="btn" aria-label="时间范围">
+        <option value="7">近 7 天</option>
+        <option value="14">近 14 天</option>
+        <option value="30" selected>近 30 天</option>
+        <option value="90">近 90 天</option>
+      </select>
+      <button id="refresh" class="btn">刷新</button>
+      <button id="logout" class="btn">退出</button>
+    </div>
+  </div>
+  <div id="stamp" class="muted"></div>
+
+  <div id="kpis" class="kpis"></div>
+
+  <div class="card"><h2>每日活跃与新增玩家</h2><div class="legend"><span><i style="background:var(--accent)"></i>活跃</span><span><i style="background:var(--accent2)"></i>新增</span></div><div id="ch1"></div></div>
+  <div class="card"><h2>每日开局与通关</h2><div class="legend"><span><i style="background:var(--accent)"></i>开局</span><span><i style="background:var(--good)"></i>通关</span></div><div id="ch2"></div></div>
+
+  <div class="card"><h2>难度（单人与每日挑战，累计）</h2><div id="diffs"></div></div>
+
+  <div class="card"><h2>次日留存（按首次出现日期分组）</h2><div id="cohorts"></div>
+    <div class="note">留存 = 首次出现后的第二天又回来玩的人占比。今天新来的人要明天才能计算。</div></div>
+
+  <div class="two">
+    <div class="card"><h2>联网对战（累计）</h2><div id="battles"></div></div>
+    <div class="card"><h2>今日每日挑战</h2><div id="daily"></div></div>
+  </div>
+
+  <div class="two">
+    <div class="card"><h2>语言分布</h2><div id="langs" class="bars"></div></div>
+    <div class="card"><h2>设备分布</h2><div id="plats" class="bars"></div></div>
+  </div>
+  <div class="card"><h2>来源（首次访问）</h2><div id="refs" class="bars"></div>
+    <div class="note">给不同群发不同链接就能区分来源：在网址后面加 <b>?src=群名</b>，例如 https://……/?src=telegram1</div></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var cfg = window.SUDOKU_CONFIG || {};
+  var $ = function (s) { return document.querySelector(s); };
+  var pw = '';
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+  function fmtSecs(s) { if (s == null) return '–'; s = Math.round(s); var m = Math.floor(s / 60), r = s % 60; return m + ':' + (r < 10 ? '0' : '') + r; }
+  function num(v) { return v == null ? '–' : Number(v).toLocaleString('en-US'); }
+  function pct(a, b) { return b > 0 ? Math.round(a * 1000 / b) / 10 : null; }
+  function pctStr(v) { return v == null ? '–' : v + '%'; }
+  function md(d) { return String(d).slice(5); }
+  var LANG = { kk: '哈萨克语', ru: '俄语', zh: '中文', en: '英语', '?': '未知' };
+  var PLAT = { android: '安卓', ios: 'iPhone / iPad', desktop: '电脑', '?': '未知' };
+
+  function showLogin(msg) {
+    $('#dash').hidden = true; $('#login').hidden = false; $('#lerr').textContent = msg || '';
+    setTimeout(function () { $('#pw').focus(); }, 50);
+  }
+
+  function api(days) {
+    var headers = { 'apikey': cfg.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+    if (/^eyJ/.test(cfg.SUPABASE_ANON_KEY)) headers.Authorization = 'Bearer ' + cfg.SUPABASE_ANON_KEY;
+    return fetch(String(cfg.SUPABASE_URL).replace(/\/+$/, '') + '/rest/v1/rpc/admin_stats', {
+      method: 'POST', headers: headers, body: JSON.stringify({ pw: pw, days: days })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        if (r.ok) return b;
+        var m = (b && b.message) || ('HTTP ' + r.status);
+        var e = new Error(m); e.unauthorized = /unauthorized/i.test(m);
+        e.missing = /admin_stats|schema cache|could not find/i.test(m);
+        throw e;
+      });
+    });
+  }
+
+  function load() {
+    var days = parseInt($('#range').value, 10) || 30;
+    $('#stamp').textContent = '加载中…';
+    return api(days).then(function (j) {
+      $('#login').hidden = true; $('#dash').hidden = false;
+      render(j);
+      $('#stamp').textContent = '更新于 ' + new Date().toLocaleTimeString() + ' · 日期按哈萨克斯坦时间（UTC+5）计算';
+    }).catch(function (e) {
+      if (e.unauthorized) { sessionStorage.removeItem('adm_pw'); localStorage.removeItem('adm_pw'); showLogin('密码不正确'); }
+      else if (e.missing) showLogin('后台还没有开通：请先在 Supabase 运行 stats.sql');
+      else if ($('#dash').hidden) showLogin('加载失败：' + e.message);
+      else $('#stamp').textContent = '加载失败：' + e.message;
+    });
+  }
+
+  /* ---------- rendering ---------- */
+  function kpi(l, v, s) {
+    var d = el('div', 'kpi'); d.appendChild(el('div', 'l', l)); d.appendChild(el('div', 'v', v)); d.appendChild(el('div', 's', s || '')); return d;
+  }
+  function render(j) {
+    var t = j.totals || {}, r = j.retention || {};
+    var k = $('#kpis'); k.innerHTML = '';
+    k.appendChild(kpi('总玩家', num(t.players), '累计出现过的匿名 ID'));
+    k.appendChild(kpi('今日新增', num(t.new_today)));
+    k.appendChild(kpi('今日活跃', num(t.dau)));
+    k.appendChild(kpi('7 日活跃', num(t.wau)));
+    k.appendChild(kpi('30 日活跃', num(t.mau)));
+    k.appendChild(kpi('次日留存', pctStr(r.d1), r.d1_size ? '样本 ' + r.d1_size + ' 人' : '数据不足'));
+    k.appendChild(kpi('7 日留存', pctStr(r.d7), r.d7_size ? '样本 ' + r.d7_size + ' 人' : '数据不足'));
+    k.appendChild(kpi('通关率', pctStr(pct(t.finishes, t.starts)), num(t.finishes) + ' / ' + num(t.starts) + ' 局'));
+    k.appendChild(kpi('平均用时', fmtSecs(t.avg_secs), '含提示罚时'));
+    k.appendChild(kpi('人均局数', t.games_per_active_day == null ? '–' : String(t.games_per_active_day), '近 7 天，每个活跃日'));
+    k.appendChild(kpi('添加到桌面', num(t.installs), '触发安装的人数'));
+    k.appendChild(kpi('桌面版在玩', num(j.pwa_players), '最近一次从桌面图标打开'));
+
+    var s = j.series || [];
+    chart($('#ch1'), s, [{ k: 'dau', c: '#7b8cff' }, { k: 'new_players', c: '#ff9f43' }]);
+    chart($('#ch2'), s, [{ k: 'starts', c: '#7b8cff' }, { k: 'finishes', c: '#45c488' }]);
+
+    // difficulty
+    var order = ['easy', 'medium', 'hard'], names = { easy: '简单', medium: '中等', hard: '困难' };
+    var by = {}; (j.diffs || []).forEach(function (d) { by[d.diff] = d; });
+    var tb = el('table'); var hr = el('tr');
+    ['难度', '开局', '通关', '通关率', '平均用时'].forEach(function (h) { hr.appendChild(el('th', '', h)); });
+    tb.appendChild(hr);
+    order.forEach(function (d) {
+      var x = by[d] || { starts: 0, finishes: 0, avg_secs: null }, tr = el('tr');
+      [names[d], num(x.starts), num(x.finishes), pctStr(pct(x.finishes, x.starts)), fmtSecs(x.avg_secs)].forEach(function (c) { tr.appendChild(el('td', '', c)); });
+      tb.appendChild(tr);
+    });
+    var dd = $('#diffs'); dd.innerHTML = ''; dd.appendChild(tb);
+
+    // cohorts
+    var co = r.cohorts || [], cc = $('#cohorts'); cc.innerHTML = '';
+    if (!co.length) cc.appendChild(el('div', 'muted', '暂无足够数据'));
+    else {
+      var ct = el('table'), ch = el('tr');
+      ['首次日期', '新增', '次日回来', '留存'].forEach(function (h) { ch.appendChild(el('th', '', h)); });
+      ct.appendChild(ch);
+      co.slice().reverse().slice(0, 14).forEach(function (c) {
+        var tr = el('tr'), p = pct(c.kept, c.size);
+        [md(c.day), num(c.size), num(c.kept), pctStr(p)].forEach(function (v) { tr.appendChild(el('td', '', v)); });
+        ct.appendChild(tr);
+      });
+      cc.appendChild(ct);
+    }
+
+    // battles / daily
+    var b = j.battles || {}, bb = $('#battles'); bb.innerHTML = '';
+    var bt = el('table');
+    [['创建房间', num(b.created)], ['对局数（≈开局人次 ÷ 2）', num(Math.round((b.starts || 0) / 2))], ['有胜负的对局', num(b.wins)], ['参与玩家', num(b.players)]].forEach(function (row) {
+      var tr = el('tr'); tr.appendChild(el('td', '', row[0])); tr.appendChild(el('td', '', row[1])); bt.appendChild(tr);
+    });
+    bb.appendChild(bt);
+    var dl = j.daily || {}, dv = $('#daily'); dv.innerHTML = '';
+    var dt = el('table');
+    [['开始的人', num(dl.starters)], ['通关的人', num(dl.finishers)], ['参与率（占今日活跃）', pctStr(pct(dl.starters, t.dau))]].forEach(function (row) {
+      var tr = el('tr'); tr.appendChild(el('td', '', row[0])); tr.appendChild(el('td', '', row[1])); dt.appendChild(tr);
+    });
+    dv.appendChild(dt);
+
+    bars($('#langs'), j.langs || [], LANG);
+    bars($('#plats'), j.plats || [], PLAT);
+    bars($('#refs'), j.refs || [], null);
+  }
+
+  function bars(box, rows, map) {
+    box.innerHTML = '';
+    if (!rows.length) { box.appendChild(el('div', 'muted', '暂无数据')); return; }
+    var max = 0, total = 0; rows.forEach(function (r) { max = Math.max(max, r.v); total += r.v; });
+    rows.forEach(function (r) {
+      var row = el('div', 'brow');
+      row.appendChild(el('span', 't0', (map && map[r.k]) || r.k));
+      var tr = el('div', 't'), i = el('i'); i.style.width = (max ? Math.max(3, r.v * 100 / max) : 0) + '%'; tr.appendChild(i); row.appendChild(tr);
+      row.appendChild(el('span', 'n', num(r.v)));
+      box.appendChild(row);
+    });
+  }
+
+  /* simple grouped bar chart (inline SVG, no libraries) */
+  var NS = 'http://www.w3.org/2000/svg';
+  function sv(tag, attrs, text) {
+    var e = document.createElementNS(NS, tag);
+    Object.keys(attrs || {}).forEach(function (a) { e.setAttribute(a, attrs[a]); });
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function niceMax(v) { if (v <= 5) return 5; var p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p; return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p; }
+  function chart(box, data, keys) {
+    box.innerHTML = '';
+    var W = 640, H = 190, L = 34, B = 22, T = 8, R = 6;
+    var svg = sv('svg', { viewBox: '0 0 ' + W + ' ' + H, 'class': 'chart', role: 'img' });
+    var max = 0; data.forEach(function (d) { keys.forEach(function (k) { max = Math.max(max, d[k.k] || 0); }); });
+    var top = niceMax(max), ph = H - B - T, pw = W - L - R;
+    for (var g = 0; g <= 4; g++) {
+      var y = T + ph - ph * g / 4, val = Math.round(top * g / 4);
+      svg.appendChild(sv('line', { x1: L, x2: W - R, y1: y, y2: y, stroke: 'rgba(255,255,255,.08)' }));
+      svg.appendChild(sv('text', { x: L - 6, y: y + 4, 'text-anchor': 'end', fill: '#8d96b0', 'font-size': 11 }, String(val)));
+    }
+    var n = data.length || 1, slot = pw / n, bw = Math.max(1.5, Math.min(18, slot / (keys.length + 0.8)));
+    data.forEach(function (d, i) {
+      var x0 = L + slot * i + (slot - bw * keys.length) / 2;
+      keys.forEach(function (k, j) {
+        var v = d[k.k] || 0, h = top ? ph * v / top : 0;
+        var r = sv('rect', { x: x0 + bw * j, y: T + ph - h, width: bw - 0.6, height: Math.max(h, v ? 1 : 0), rx: 1.5, fill: k.c });
+        r.appendChild(sv('title', {}, md(d.day) + '  ' + v));
+        svg.appendChild(r);
+      });
+    });
+    [0, Math.floor((n - 1) / 2), n - 1].forEach(function (i, idx) {
+      if (!data[i] || (idx > 0 && i === 0)) return;
+      var x = L + slot * i + slot / 2;
+      svg.appendChild(sv('text', { x: x, y: H - 5, 'text-anchor': idx === 0 ? 'start' : idx === 2 ? 'end' : 'middle', fill: '#8d96b0', 'font-size': 11 }, md(data[i].day)));
+    });
+    box.appendChild(svg);
+  }
+
+  /* ---------- login flow ---------- */
+  function start() {
+    if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) { showLogin('config.js 里还没有填 Supabase 地址和密钥'); $('#go').disabled = true; return; }
+    pw = sessionStorage.getItem('adm_pw') || localStorage.getItem('adm_pw') || '';
+    if (pw) load(); else showLogin('');
+  }
+  $('#go').addEventListener('click', function () {
+    pw = $('#pw').value; if (!pw) return;
+    sessionStorage.setItem('adm_pw', pw);
+    if ($('#remember').checked) localStorage.setItem('adm_pw', pw);
+    load();
+  });
+  $('#pw').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('#go').click(); });
+  $('#refresh').addEventListener('click', load);
+  $('#range').addEventListener('change', load);
+  $('#logout').addEventListener('click', function () { sessionStorage.removeItem('adm_pw'); localStorage.removeItem('adm_pw'); pw = ''; $('#pw').value = ''; showLogin(''); });
+  start();
+})();
+</script>
+</body>
+</html>
