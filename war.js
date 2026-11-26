@@ -86,6 +86,43 @@
   }
   function focus(h, k) { var c = center(h); view.k = k || view.k; view.x = vw / 2 - c[0] * view.k; view.y = vh / 2 - c[1] * view.k; clamp(); draw(); }
   function hexPath(cx, cy) { ctx.beginPath(); for (var i = 0; i < 6; i++) { var x = cx + CORN[i][0], y = cy + CORN[i][1]; if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); } ctx.closePath(); }
+  /* real-geography base layer */
+  function lonX(lon) { return (lon + 180) / W.DLON * HW; }
+  function latY(lat) { return (W.LAT0 - lat) / W.DLAT * 1.5 * SZ + SZ; }
+  var LC = {};
+  function landColor(name) {
+    if (LC[name]) return LC[name];
+    var h = 0; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return (LC[name] = 'hsl(' + (70 + h % 60) + ',' + (20 + (h >> 3) % 10) + '%,' + (27 + (h >> 5) % 9) + '%)');
+  }
+  var labelsCache = null;
+  function countryLabels() {
+    if (labelsCache) return labelsCache;
+    var best = {};
+    (W.polys || []).forEach(function (p) { if (!p.name) return; var a = (p.x1 - p.x0) * (p.y1 - p.y0); if (!best[p.name] || a > best[p.name].a) best[p.name] = { a: a, p: p }; });
+    labelsCache = Object.keys(best).map(function (n) { var p = best[n].p; return { n: n, x: lonX((p.x0 + p.x1) / 2), y: latY((p.y0 + p.y1) / 2), w: (p.x1 - p.x0) / W.DLON * HW }; });
+    return labelsCache;
+  }
+  function drawLand(x0, x1, y0, y1) {
+    var polys = W.polys || [];
+    for (var i = 0; i < polys.length; i++) {
+      var p = polys[i];
+      if (lonX(p.x1) < x0 || lonX(p.x0) > x1 || latY(p.y0) < y0 || latY(p.y1) > y1) continue;
+      ctx.beginPath();
+      for (var r = 0; r < p.rings.length; r++) {
+        var ring = p.rings[r];
+        for (var k = 0; k < ring.length; k++) { var x = lonX(ring[k][0]), y = latY(ring[k][1]); if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+        ctx.closePath();
+      }
+      ctx.fillStyle = landColor(p.name || 'x'); ctx.fill('evenodd');
+      ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(225,238,250,.4)'; ctx.stroke();
+    }
+  }
+  function drawCountryNames() {
+    if (!W.real) return;
+    ctx.font = '600 ' + 12 + 'px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.38)';
+    countryLabels().forEach(function (l) { if (l.w * view.k > 80) ctx.fillText(l.n.toUpperCase(), l.x, l.y); });
+  }
   function draw() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, vw, vh);
@@ -93,14 +130,16 @@
     var x0 = -view.x / view.k - SZ * 2, x1 = (vw - view.x) / view.k + SZ * 2, y0 = -view.y / view.k - SZ * 2, y1 = (vh - view.y) / view.k + SZ * 2;
     var started = st.start >= 0;
     var labels = [];
+    drawLand(x0, x1, y0, y1);
+    drawCountryNames();
     for (var n = 0; n < W.hexes.length; n++) {
       var h = W.hexes[n], c = center(h);
       if (c[0] < x0 || c[0] > x1 || c[1] < y0 || c[1] > y1) continue;
       var mine = owned[h.id], fort = isFort(h), canAtk = started && !mine && adjacent(h), cd = cdLeft(h);
       hexPath(c[0], c[1]);
-      ctx.fillStyle = mine ? (fort ? '#3b86d6' : '#2f6fb0') : (cd > 0 && canAtk ? '#3a3a3a' : (fort ? '#6a5642' : '#4b5a43'));
-      ctx.fill();
-      ctx.lineWidth = mine ? 1.6 : 1; ctx.strokeStyle = mine ? '#8cc2ff' : '#2a3626'; ctx.stroke();
+      var fs = mine ? (fort ? 'rgba(59,134,214,.62)' : 'rgba(47,111,176,.55)') : (cd > 0 && canAtk ? 'rgba(60,60,60,.7)' : (fort ? 'rgba(150,100,50,.4)' : ''));
+      if (fs) { ctx.fillStyle = fs; ctx.fill(); }
+      ctx.lineWidth = mine ? 1.6 : 0.8; ctx.strokeStyle = mine ? '#8cc2ff' : 'rgba(255,255,255,.17)'; ctx.stroke();
       if (canAtk && cd === 0) { hexPath(c[0], c[1]); ctx.lineWidth = 2.2; ctx.strokeStyle = '#ff6b5f'; ctx.stroke(); }
       if (sel && sel.id === h.id) { hexPath(c[0], c[1]); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke(); }
       var ico = '';
@@ -330,7 +369,7 @@
   });
   W.onLate = function () { if (st.start < 0 && !Object.keys(owned).length) location.reload(); else toast(t('mapLate')); };
   window.addEventListener('resize', resize);
-  function focusDefault() { var h = W.byId[st.start]; if (h) focus(h, 1); else { view.k = Math.max(vw / worldW, vh / worldH) * 1.35; var c = [worldW * 0.58, worldH * 0.34]; view.x = vw / 2 - c[0] * view.k; view.y = vh / 2 - c[1] * view.k; clamp(); draw(); } }
+  function focusDefault() { var h = W.byId[st.start]; if (h) focus(h, 1); else { view.k = 1.0; var c = [lonX(67), latY(48)]; view.x = vw / 2 - c[0] * view.k; view.y = vh / 2 - c[1] * view.k; clamp(); draw(); } }
   resize(); refresh(); focusDefault();
   if (st.start >= 0) { var sh = W.byId[st.start]; if (sh) focus(sh, 1); }
   window.WarDebug = { screenOf: function (id) { var c = center(W.byId[id]); return [c[0] * view.k + view.x, c[1] * view.k + view.y]; }, focus: function (id, k) { focus(W.byId[id], k); }, st: function () { return st; }, owned: function () { return owned; }, hexes: W.hexes };
