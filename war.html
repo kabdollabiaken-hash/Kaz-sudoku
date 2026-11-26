@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0b1620">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<title>World Conquest</title>
+<link rel="stylesheet" href="war.css">
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <button id="w-home" class="ib" type="button" aria-label="Back">←</button>
+    <div id="w-turn" class="turn"></div>
+    <div class="res"><span>🪙 <b id="r-g">0</b></span><span>⚙️ <b id="r-s">0</b></span><span>💎 <b id="r-d">0</b></span></div>
+    <button id="w-menu" class="ib" type="button" aria-label="Menu">☰</button>
+  </header>
+
+  <main id="mapwrap"><canvas id="map"></canvas><div id="w-hint" class="hintbar"></div></main>
+
+  <div id="panel" class="panel" hidden>
+    <div class="p-head"><b id="p-title"></b><span id="p-type" class="tag"></span></div>
+    <div id="p-body" class="p-body"></div>
+    <div class="p-actions"><button id="p-go" class="btn primary" type="button"></button></div>
+  </div>
+
+  <footer id="bottombar">
+    <button id="b-up" class="bb" type="button"><span class="bi">🛠️</span><span id="b-up-t"></span></button>
+    <button id="b-train" class="bb" type="button"><span class="bi">🎯</span><span id="b-train-t"></span></button>
+    <div id="b-prog" class="prog"><div class="bar"><i id="b-prog-fill"></i></div><small id="b-prog-t"></small></div>
+  </footer>
+
+  <!-- sudoku -->
+  <section id="screen-sd" hidden>
+    <div class="sd-top">
+      <button id="sd-back" class="ib" type="button" aria-label="Back">←</button>
+      <div id="sd-title" class="sd-title"></div>
+      <div id="sd-time" class="sd-time">--:--</div>
+    </div>
+    <div class="sd-sub"><span id="sd-mist"></span><span id="sd-info"></span></div>
+    <div id="board-wrap"><div id="board"></div></div>
+    <div class="tools">
+      <button id="t-erase" class="tool" type="button"><span class="ti">⌫</span><span id="t-erase-t"></span></button>
+      <button id="t-notes" class="tool" type="button"><span class="ti">✎</span><span id="t-notes-t"></span></button>
+      <button id="t-hint" class="tool" type="button"><span class="ti">💡</span><span id="t-hint-t"></span></button>
+    </div>
+    <div id="pad" class="pad"></div>
+  </section>
+
+  <div id="modal" class="modal" hidden>
+    <div class="sheet">
+      <h2 id="m-title"></h2>
+      <div id="m-body" class="m-body"></div>
+      <div id="m-actions" class="m-actions"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+</div>
+<script src="core.js"></script>
+<script src="i18n.js"></script>
+<script src="world.js"></script>
+<script src="war.js"></script>
+</body>
+</html>
