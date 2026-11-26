@@ -21,7 +21,7 @@
   if (!settings.playerId) { settings.playerId = newPlayerId(); LS.set('sdk_settings', settings); }
   function displayName() { return (settings.name || '').trim().slice(0, 20) || settings.playerId; }
   function ico(id, cls) { return '<svg class="ic ' + (cls || '') + '"><use href="#' + id + '"/></svg>'; }
-  var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {} }, LS.get('sdk_stats', {}));
+  var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {}, gems: 0, car: 0, easyDay: '', easyN: 0 }, LS.get('sdk_stats', {}));
   if (stats.sz !== 2) { stats.sz = 2; stats.best = {}; stats.wins = { easy: 0, medium: 0, hard: 0 }; LS.set('sdk_stats', stats); LS.del('sdk_save'); }
   function saveSettings() { LS.set('sdk_settings', settings); }
   function saveStats() { LS.set('sdk_stats', stats); }
@@ -110,6 +110,48 @@
     if (open) buildLangMenu();
     m.hidden = !open; $('#btn-lang').setAttribute('aria-expanded', open ? 'true' : 'false');
   }
+  /* ---------- gems & car ---------- */
+  var VEH = ['🛹', '🚲', '🏍️', '🚗', '🚙', '🚚'];
+  var COSTS = [40, 100, 200, 400, 800];
+  var GEM_BASE = { easy: 5, medium: 10, hard: 20 };
+  function gemAmount(mode, diff, hints, streak) {
+    var a;
+    if (mode === 'daily') a = 15 + 2 * Math.min(streak || 0, 5);
+    else if (diff === 'easy') {
+      var d = C.dailySeed();
+      if (stats.easyDay !== d) { stats.easyDay = d; stats.easyN = 0; }
+      stats.easyN++;
+      a = stats.easyN <= 5 ? 5 : 1;
+    } else a = GEM_BASE[diff] || 5;
+    if (hints > 0) a = Math.max(1, Math.floor(a / 2));
+    return a;
+  }
+  function addGems(n) { stats.gems = (stats.gems || 0) + n; }
+  function renderCar() {
+    var lvl = Math.min(stats.car || 0, 5), maxed = lvl >= 5, cost = maxed ? 0 : COSTS[lvl], g = stats.gems || 0;
+    $('#gem-txt').textContent = g;
+    $('#car-ic').textContent = VEH[lvl];
+    $('#car-name').textContent = t('v' + lvl);
+    $('#car-route').textContent = maxed ? t('journeyDone') : t('c' + lvl) + ' → ' + t('c' + (lvl + 1));
+    var tr = $('#car-track'); tr.innerHTML = '';
+    for (var i = 0; i < 6; i++) { var d = el('span', 'dot' + (i < lvl ? ' done' : '') + (i === lvl ? ' cur' : '')); tr.appendChild(d); if (i < 5) tr.appendChild(el('span', 'seg' + (i < lvl ? ' done' : ''))); }
+    var up = $('#btn-upgrade');
+    up.hidden = maxed;
+    up.textContent = t('upgrade') + ' · ' + cost + ' 💎';
+    up.disabled = g < cost;
+    $('.car-bar').hidden = maxed;
+    $('#car-fill').style.width = maxed ? '100%' : Math.min(100, Math.round(g * 100 / cost)) + '%';
+    $('#car-gems').textContent = maxed ? '' : (g >= cost ? '' : g + ' / ' + cost + ' 💎 · ') + (g >= cost ? '' : t('carHint'));
+  }
+  function upgradeCar() {
+    var lvl = stats.car || 0; if (lvl >= 5) return;
+    var cost = COSTS[lvl]; if ((stats.gems || 0) < cost) return;
+    stats.gems -= cost; stats.car = lvl + 1; saveStats(); renderCar();
+    var n = lvl + 1, big = el('div', 'big-time', VEH[n]);
+    showInfo({ title: '🎉 ' + t('v' + n), body: [big, t('arrived').replace('{c}', t('c' + n)), t('f' + n), n >= 5 ? t('journeyDone') : ''].filter(Boolean),
+      buttons: [{ label: t('awesome'), cls: 'primary' }] });
+  }
+
   function renderHome() {
     $('#lang-label').textContent = I.LANGS.filter(function (l) { return l[0] === I.get(); })[0][1];
     var sv = LS.get('sdk_save', null);
@@ -120,13 +162,18 @@
     } else cont.hidden = true;
     var today = C.dailySeed();
     var done = stats.dailyDone[today] !== undefined;
-    $('#daily-sub').textContent = today;
+    $('#daily-title').textContent = t('daily') + ' · ' + today.slice(5).replace('-', '/');
+    $('#daily-go').hidden = done;
+    var stk = computeStreak();
+    $('#streak-txt').textContent = stk > 0 ? t('streakDays').replace('{n}', stk) : t('streakNone');
+    ['easy', 'medium', 'hard'].forEach(function (d) { var e = $('#best-' + d); if (e) e.textContent = stats.best[d] !== undefined ? t('bestShort') + ' ' + fmt(stats.best[d]) : ''; });
     $('#daily-check').hidden = !done;
     var g = $('#stats-grid'); g.innerHTML = '';
     var total = stats.wins.easy + stats.wins.medium + stats.wins.hard;
     g.appendChild(statBox(t('wins'), String(total), 'i-check', '#8fa3c8'));
     g.appendChild(statBox(t('streak'), String(computeStreak()), 'i-flame', '#ff8a4c'));
     g.appendChild(statBox(t('best') + ' · ' + t('medium'), stats.best.medium !== undefined ? fmt(stats.best.medium) : '00:00', 'i-timer', '#9aa5c0'));
+    renderCar();
     buildLangMenu();
     updateInstallBtn();
   }
@@ -318,7 +365,7 @@
     if (G.mode === 'battle') { if (G.battle && G.battle.onDone) G.battle.onDone(secs); return; }
     LS.del('sdk_save');
     var today = C.dailySeed();
-    var counts = !G.replay;
+    var counts = !G.replay, gain = 0;
     if (counts) {
       stats.wins[G.diff] = (stats.wins[G.diff] || 0) + 1;
       if (stats.best[G.diff] === undefined || G.score < stats.best[G.diff]) stats.best[G.diff] = G.score;
@@ -326,17 +373,21 @@
         var y = C.dailySeed(Date.now() - 86400000);
         stats.streak = stats.lastDaily === y ? stats.streak + 1 : 1;
         stats.lastDaily = today; stats.dailyDone[today] = G.score;
+        gain = gemAmount('daily', G.diff, G.hints, stats.streak);
       }
+      if (G.mode !== 'daily') gain = gemAmount('solo', G.diff, G.hints, 0);
+      addGems(gain);
       saveStats();
     }
     if (counts && window.Track) Track.log('finish', { mode: G.mode, diff: G.diff, secs: G.score });
-    showWin(counts);
+    showWin(counts, gain);
   }
 
-  function showWin(counts) {
+  function showWin(counts, gain) {
     var body = [];
     body.push(el('div', 'big-time', fmt(G.score)));
     body.push(t('mistakes') + ': ' + G.mist + (G.hints ? ' · ' + t('hintsUsed') + ': ' + G.hints + ' (+' + (30 * G.hints) + 's)' : ''));
+    if (gain) body.push(el('div', 'gain', '+' + gain + ' 💎'));
     var canSubmit = counts && window.Online && window.Online.configured();
     if (canSubmit) {
       var msg = el('p', '', '');
@@ -495,6 +546,7 @@
     });
     $('#btn-online').addEventListener('click', function () { show('online'); if (window.Online) window.Online.openLobby(); });
     $('#btn-board').addEventListener('click', function () { show('board'); });
+    $('#btn-upgrade').addEventListener('click', upgradeCar);
     $('#lb-back').addEventListener('click', function () { show('home'); });
     $('#btn-lang').addEventListener('click', function (e) { e.stopPropagation(); toggleLangMenu(); });
     $('#lang-menu').addEventListener('click', function (e) { e.stopPropagation(); });
@@ -558,10 +610,12 @@
     });
   }
 
+  function awardBattle() { var n = 8; addGems(n); saveStats(); return n; }
+
   /* ---------- public API for online.js ---------- */
   window.App = {
     t: t, show: show, toast: toast, showInfo: showInfo, closeModal: closeModal, fmt: fmt, el: el,
-    startBattleGame: startBattleGame,
+    startBattleGame: startBattleGame, awardBattle: awardBattle,
     setOppProgress: function (p) { setBattleBars(null, p); },
     freeze: function () { if (G) { tick(); G.finished = true; renderAll(); } },
     getSettings: function () { return settings; },
