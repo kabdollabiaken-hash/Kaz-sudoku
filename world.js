@@ -100,7 +100,18 @@
       var name = (g.properties && g.properties.name) || '';
       if (name === 'Antarctica') return;
       var polys = g.type === 'Polygon' ? [g.arcs] : g.type === 'MultiPolygon' ? g.arcs : [];
-      polys.forEach(function (rs) { out.push(mkPoly(rs.map(ring), name)); });
+      polys.forEach(function (rs) {
+        // unwrap longitudes so rings crossing the antimeridian stay continuous, then mirror them across the edge
+        var rings = rs.map(function (r) {
+          var pts = ring(r), prev = null, off = 0;
+          return pts.map(function (p) { var x = p[0] + off; if (prev !== null) { if (x - prev > 180) { off -= 360; x -= 360; } else if (x - prev < -180) { off += 360; x += 360; } } prev = x; return [x, p[1]]; });
+        });
+        var mx = -1e9, mn = 1e9; rings[0].forEach(function (p) { if (p[0] > mx) mx = p[0]; if (p[0] < mn) mn = p[0]; });
+        out.push(mkPoly(rings, name));
+        function shifted(d) { return rings.map(function (r) { return r.map(function (p) { return [p[0] + d, p[1]]; }); }); }
+        if (mx > 180) out.push(mkPoly(shifted(-360), name));
+        if (mn < -180) out.push(mkPoly(shifted(360), name));
+      });
     });
     return out;
   }
