@@ -111,8 +111,6 @@
     m.hidden = !open; $('#btn-lang').setAttribute('aria-expanded', open ? 'true' : 'false');
   }
   /* ---------- gems & car ---------- */
-  var VEH = ['🛹', '🚲', '🏍️', '🚗', '🚙', '🚚'];
-  var COSTS = [40, 100, 200, 400, 800];
   var GEM_BASE = { easy: 5, medium: 10, hard: 20 };
   function gemAmount(mode, diff, hints, streak) {
     var a;
@@ -127,29 +125,10 @@
     return a;
   }
   function addGems(n) { stats.gems = (stats.gems || 0) + n; }
-  function renderCar() {
-    var lvl = Math.min(stats.car || 0, 5), maxed = lvl >= 5, cost = maxed ? 0 : COSTS[lvl], g = stats.gems || 0;
-    $('#gem-txt').textContent = g;
-    $('#car-ic').textContent = VEH[lvl];
-    $('#car-name').textContent = t('v' + lvl);
-    $('#car-route').textContent = maxed ? t('journeyDone') : t('c' + lvl) + ' → ' + t('c' + (lvl + 1));
-    var tr = $('#car-track'); tr.innerHTML = '';
-    for (var i = 0; i < 6; i++) { var d = el('span', 'dot' + (i < lvl ? ' done' : '') + (i === lvl ? ' cur' : '')); tr.appendChild(d); if (i < 5) tr.appendChild(el('span', 'seg' + (i < lvl ? ' done' : ''))); }
-    var up = $('#btn-upgrade');
-    up.hidden = maxed;
-    up.textContent = t('upgrade') + ' · ' + cost + ' 💎';
-    up.disabled = g < cost;
-    $('.car-bar').hidden = maxed;
-    $('#car-fill').style.width = maxed ? '100%' : Math.min(100, Math.round(g * 100 / cost)) + '%';
-    $('#car-gems').textContent = maxed ? '' : (g >= cost ? '' : g + ' / ' + cost + ' 💎 · ') + (g >= cost ? '' : t('carHint'));
-  }
-  function upgradeCar() {
-    var lvl = stats.car || 0; if (lvl >= 5) return;
-    var cost = COSTS[lvl]; if ((stats.gems || 0) < cost) return;
-    stats.gems -= cost; stats.car = lvl + 1; saveStats(); renderCar();
-    var n = lvl + 1, big = el('div', 'big-time', VEH[n]);
-    showInfo({ title: '🎉 ' + t('v' + n), body: [big, t('arrived').replace('{c}', t('c' + n)), t('f' + n), n >= 5 ? t('journeyDone') : ''].filter(Boolean),
-      buttons: [{ label: t('awesome'), cls: 'primary' }] });
+  function renderWar() {
+    $('#gem-txt').textContent = stats.gems || 0;
+    var w = LS.get('sdk_war', null), n = w && w.owned ? w.owned.length : 0;
+    $('#war-sub').textContent = n > 0 ? t('warOwned').replace('{n}', n) : t('warSub');
   }
 
   function renderHome() {
@@ -173,7 +152,7 @@
     g.appendChild(statBox(t('wins'), String(total), 'i-check', '#8fa3c8'));
     g.appendChild(statBox(t('streak'), String(computeStreak()), 'i-flame', '#ff8a4c'));
     g.appendChild(statBox(t('best') + ' · ' + t('medium'), stats.best.medium !== undefined ? fmt(stats.best.medium) : '00:00', 'i-timer', '#9aa5c0'));
-    renderCar();
+    renderWar();
     buildLangMenu();
     updateInstallBtn();
   }
@@ -546,7 +525,7 @@
     });
     $('#btn-online').addEventListener('click', function () { show('online'); if (window.Online) window.Online.openLobby(); });
     $('#btn-board').addEventListener('click', function () { show('board'); });
-    $('#btn-upgrade').addEventListener('click', upgradeCar);
+    $('#btn-war').addEventListener('click', function () { location.href = 'war.html'; });
     $('#lb-back').addEventListener('click', function () { show('home'); });
     $('#btn-lang').addEventListener('click', function (e) { e.stopPropagation(); toggleLangMenu(); });
     $('#lang-menu').addEventListener('click', function (e) { e.stopPropagation(); });
