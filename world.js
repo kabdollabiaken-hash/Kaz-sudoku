@@ -158,23 +158,29 @@
   apply(FALLBACK, true, false);
 
   // Real world map: world-atlas TopoJSON (cached after the first successful download).
-  var URLS = ['https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json', 'https://unpkg.com/world-atlas@2.0.2/countries-110m.json'];
+  // Order: own site first (optional countries-110m.json uploaded next to the game), then CDNs.
+  var URLS = ['countries-110m.json', 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json', 'https://fastly.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json', 'https://unpkg.com/world-atlas@2.0.2/countries-110m.json'];
   var CKEY = 'sdk_topo2';
+  WM.status = { real: false, source: '', errors: [] };
   function useTopo(topo, applyNow) {
     try { var polys = decodeTopo(topo); if (polys.length < 60) return false; if (applyNow) apply(polys, false, true); return true; } catch (e) { return false; }
   }
   WM.ready = new Promise(function (resolve) {
     var cached = null; try { cached = JSON.parse(localStorage.getItem(CKEY)); } catch (e) {}
-    if (cached && useTopo(cached, true)) { resolve(); return; }
-    if (typeof fetch === 'undefined') { resolve(); return; }
-    var finished = false, timer = setTimeout(function () { finished = true; resolve(); }, 7000);
+    if (cached && useTopo(cached, true)) { WM.status.real = true; WM.status.source = 'cache'; resolve(); return; }
+    if (typeof fetch === 'undefined') { WM.status.errors.push('no fetch'); resolve(); return; }
+    var finished = false, timer = setTimeout(function () { finished = true; WM.status.errors.push('timeout 15s'); resolve(); }, 15000);
     function tryUrl(i) {
       if (i >= URLS.length) { if (!finished) { finished = true; clearTimeout(timer); resolve(); } return; }
-      fetch(URLS[i]).then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); }).then(function (topo) {
-        if (!useTopo(topo, !finished)) throw new Error('bad');
+      var u = URLS[i], short = u.replace(/^https?:\/\//, '').split('/')[0] || u;
+      if (i === 0) short = 'own-site';
+      fetch(u).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function (topo) {
+        if (!useTopo(topo, !finished)) throw new Error('bad data');
         try { localStorage.setItem(CKEY, JSON.stringify(topo)); } catch (e) {}
-        if (!finished) { finished = true; clearTimeout(timer); resolve(); }
-      }).catch(function () { tryUrl(i + 1); });
+        WM.status.source = short;
+        if (!finished) { WM.status.real = true; finished = true; clearTimeout(timer); resolve(); }
+        else if (WM.onLate) WM.onLate();
+      }).catch(function (e) { WM.status.errors.push(short + ': ' + (e && e.message || 'network')); tryUrl(i + 1); });
     }
     tryUrl(0);
   });
