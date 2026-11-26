@@ -43,7 +43,7 @@
   <!-- HOME -->
   <section id="screen-home" class="screen active">
     <header class="top">
-      <h1 data-i18n="title">Sudoku</h1>
+      <div class="ttl"><h1 data-i18n="title">Sudoku</h1><div class="pills"><span id="streak-pill" class="pill-flame"><svg class="ic"><use href="#i-flame"/></svg><span id="streak-txt"></span></span><span class="pill-gem">💎 <b id="gem-txt">0</b></span></div></div>
       <div class="top-actions">
         <div class="lang-wrap"><button id="btn-lang" class="chip" type="button" aria-haspopup="listbox" aria-expanded="false"><svg class="ic"><use href="#i-globe"/></svg><span id="lang-label"></span><svg class="ic chev"><use href="#i-chevd"/></svg></button><div id="lang-menu" class="lang-menu" role="listbox" hidden></div></div>
         <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings"><svg class="ic"><use href="#i-gear"/></svg></button>
@@ -59,25 +59,36 @@
       <div class="card">
         <div class="card-title"><svg class="ic"><use href="#i-dice"/></svg><span data-i18n="newGame">New game</span></div>
         <div class="row3">
-          <button class="btn diff tile easy" type="button" data-diff="easy"><svg class="ic tile-ic"><use href="#i-grid"/></svg><span data-i18n="easy">Easy</span><small class="tsz">4×4</small></button>
-          <button class="btn diff tile medium" type="button" data-diff="medium"><svg class="ic tile-ic"><use href="#i-grid"/></svg><span data-i18n="medium">Medium</span><small class="tsz">6×6</small></button>
-          <button class="btn diff tile hard" type="button" data-diff="hard"><svg class="ic tile-ic"><use href="#i-grid"/></svg><span data-i18n="hard">Hard</span><small class="tsz">9×9</small></button>
+          <button class="btn diff tile easy" type="button" data-diff="easy"><span class="tile-ic"><svg class="ic"><use href="#i-grid"/></svg></span><span class="tn" data-i18n="easy">Easy</span><small class="tsz">4×4</small><span class="tag" data-i18n="tagEasy"></span><span class="tbest" id="best-easy"></span></button>
+          <button class="btn diff tile medium" type="button" data-diff="medium"><span class="tile-ic"><svg class="ic"><use href="#i-grid"/></svg></span><span class="tn" data-i18n="medium">Medium</span><small class="tsz">6×6</small><span class="tag" data-i18n="tagMedium"></span><span class="tbest" id="best-medium"></span></button>
+          <button class="btn diff tile hard" type="button" data-diff="hard"><span class="tile-ic"><svg class="ic"><use href="#i-grid"/></svg></span><span class="tn" data-i18n="hard">Hard</span><small class="tsz">9×9</small><span class="tag" data-i18n="tagHard"></span><span class="tbest" id="best-hard"></span></button>
         </div>
       </div>
 
-      <button id="btn-daily" class="btn row-card gold" type="button">
+            <div id="car-card" class="card car">
+        <div class="car-top">
+          <span id="car-ic" class="car-ic"></span>
+          <div class="car-main"><b id="car-name"></b><small id="car-route"></small></div>
+          <button id="btn-upgrade" class="btn primary small" type="button"></button>
+        </div>
+        <div id="car-track" class="car-track"></div>
+        <div class="car-bar"><i id="car-fill"></i></div>
+        <small id="car-gems" class="muted"></small>
+      </div>
+
+      <button id="btn-daily" class="btn rc-big gold" type="button">
         <svg class="ic ri"><use href="#i-cal"/></svg>
-        <span class="cb-main" data-i18n="daily">Daily</span>
-        <span class="rc-right"><small id="daily-sub"></small><svg id="daily-check" class="ic chk" hidden><use href="#i-checkfill"/></svg></span>
+        <span class="rc-main"><b id="daily-title"></b><small data-i18n="dailySub"></small></span>
+        <span class="pill-btn"><svg id="daily-check" class="ic chk" hidden><use href="#i-checkfill"/></svg><span id="daily-go" data-i18n="goBtn"></span><svg class="ic"><use href="#i-chev"/></svg></span>
       </button>
-      <button id="btn-online" class="btn row-card" type="button">
-        <svg class="ic ri blue"><use href="#i-swords"/></svg>
-        <span class="cb-main" data-i18n="online">Online</span>
-        <span class="rc-right"><small class="vs">VS</small></span>
+      <button id="btn-online" class="btn rc-big violet" type="button">
+        <svg class="ic ri"><use href="#i-swords"/></svg>
+        <span class="rc-main"><b data-i18n="online"></b><small data-i18n="onlineSub"></small></span>
+        <span class="pill-btn"><span data-i18n="goBtn"></span><svg class="ic"><use href="#i-chev"/></svg></span>
       </button>
-      <button id="btn-board" class="btn row-card" type="button">
-        <svg class="ic ri gold-ic"><use href="#i-trophy"/></svg>
-        <span class="cb-main" data-i18n="leaderboard">Leaderboard</span>
+      <button id="btn-board" class="btn rc-big amber" type="button">
+        <svg class="ic ri"><use href="#i-trophy"/></svg>
+        <span class="rc-main"><b data-i18n="leaderboard"></b><small data-i18n="boardSub"></small></span>
         <span class="rc-right"><svg class="ic"><use href="#i-chev"/></svg></span>
       </button>
 
