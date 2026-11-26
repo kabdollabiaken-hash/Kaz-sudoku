@@ -14,30 +14,30 @@
 
   /* ---------- strings ---------- */
   var S = {
-    zh: { wTitle: '世界征服', turnN: '第 {n} 回合', pickStart: '点击地图选择你的首都（双指缩放、拖动）', buildCap: '在这里建立首都', region: '区域', fort: '要塞', plain: '平原', mine: '我的领地', capital: '首都',
+    zh: { mapReal: '地图：真实世界地图 ✓', mapSimple: '地图：简化版（真实地图下载失败）', mapRetry: '重新下载真实地图', mapLate: '真实地图已下载，重新打开后生效', wTitle: '世界征服', turnN: '第 {n} 回合', pickStart: '点击地图选择你的首都（双指缩放、拖动）', buildCap: '在这里建立首都', region: '区域', fort: '要塞', plain: '平原', mine: '我的领地', capital: '首都',
       attack: '进攻', timeLimit: '限时', reward: '奖励', notAdj: '只能进攻与你领地相邻的格子', cooling: '冷却中：还需 {n} 回合', upgrade: '升级', train: '练兵', progress: '占领 {a}/{b}',
       inf: '步兵', tank: '装甲', air: '空军', eng: '工程兵', infD: '6×6 时间 +20 秒 / 级', tankD: '9×9 时间 +45 秒 / 级', airD: '每次进攻 +1 个提示 / 级', engD: '答错少扣 2 秒 / 级',
       max: '已满级', notEnough: '资源不足', sdAttack: '进攻', sdTrain: '练兵', timeUp: '时间到！进攻失败', timeUpD: '该格冷却 2 回合后可再次进攻。', captured: '占领成功！', fast: '速度奖励 +50%', income: '本回合收入',
       retreat: '撤退？本次进攻将作废。', hint: '提示', back: '返回', erase: '擦除', notes: '笔记', worldWon: '你征服了全世界！', resetGame: '重新开始战争', confirmReset: '确定重新开始？进度将清空。',
-      ok: '继续', home: '回首页', mistakes: '错误', lvl: '等级', untilEnd: '剩余', trainDone: '练兵完成', menu: '菜单', cancel: '取消', income2: '每回合收入', mistakePen: '答错 -{n} 秒', hintsLeft: '提示' },
-    en: { wTitle: 'World Conquest', turnN: 'Turn {n}', pickStart: 'Tap the map to choose your capital (drag, pinch to zoom)', buildCap: 'Build capital here', region: 'Region', fort: 'Fortress', plain: 'Plains', mine: 'My territory', capital: 'Capital',
+      ok: '继续', home: '回首页', mistakes: '错误', lvl: '等级', untilEnd: '剩余', trainDone: '练兵完成', menu: '菜单', cancel: '取消', income2: '每回合收入', mistakePen: '答错 -{n} 秒', hintsLeft: '提示', mapReal: '真实地图', mapSimple: '简化地图（联网后刷新）' },
+    en: { mapReal: 'Map: real world map ✓', mapSimple: 'Map: simplified (real map download failed)', mapRetry: 'Re-download real map', mapLate: 'Real map downloaded; reopen to use it', wTitle: 'World Conquest', turnN: 'Turn {n}', pickStart: 'Tap the map to choose your capital (drag, pinch to zoom)', buildCap: 'Build capital here', region: 'Region', fort: 'Fortress', plain: 'Plains', mine: 'My territory', capital: 'Capital',
       attack: 'Attack', timeLimit: 'Time limit', reward: 'Reward', notAdj: 'You can only attack hexes next to your territory', cooling: 'Cooling down: {n} turns', upgrade: 'Upgrade', train: 'Train', progress: 'Captured {a}/{b}',
       inf: 'Infantry', tank: 'Armor', air: 'Air force', eng: 'Engineers', infD: '6×6 time +20s / level', tankD: '9×9 time +45s / level', airD: '+1 hint per attack / level', engD: 'Mistake costs 2s less / level',
       max: 'MAX', notEnough: 'Not enough resources', sdAttack: 'Attack', sdTrain: 'Training', timeUp: "Time's up! Attack failed", timeUpD: 'This hex can be attacked again in 2 turns.', captured: 'Captured!', fast: 'Speed bonus +50%', income: 'Income this turn',
       retreat: 'Retreat? This attack will be cancelled.', hint: 'Hint', back: 'Back', erase: 'Erase', notes: 'Notes', worldWon: 'You conquered the world!', resetGame: 'Restart war', confirmReset: 'Restart? All progress will be erased.',
-      ok: 'Continue', home: 'Home', mistakes: 'Mistakes', lvl: 'Lv', untilEnd: 'Left', trainDone: 'Training complete', menu: 'Menu', cancel: 'Cancel', income2: 'Income per turn', mistakePen: 'Mistake -{n}s', hintsLeft: 'Hints' },
-    ru: { wTitle: 'Завоевание мира', turnN: 'Ход {n}', pickStart: 'Нажмите на карту, чтобы выбрать столицу (двигайте, щипок — масштаб)', buildCap: 'Основать столицу здесь', region: 'Регион', fort: 'Крепость', plain: 'Равнина', mine: 'Моя территория', capital: 'Столица',
+      ok: 'Continue', home: 'Home', mistakes: 'Mistakes', lvl: 'Lv', untilEnd: 'Left', trainDone: 'Training complete', menu: 'Menu', cancel: 'Cancel', income2: 'Income per turn', mistakePen: 'Mistake -{n}s', hintsLeft: 'Hints', mapReal: 'Real map', mapSimple: 'Simplified map (go online, refresh)' },
+    ru: { mapReal: 'Карта: реальная ✓', mapSimple: 'Карта: упрощённая (не удалось загрузить реальную)', mapRetry: 'Загрузить реальную карту заново', mapLate: 'Реальная карта загружена; откройте заново', wTitle: 'Завоевание мира', turnN: 'Ход {n}', pickStart: 'Нажмите на карту, чтобы выбрать столицу (двигайте, щипок — масштаб)', buildCap: 'Основать столицу здесь', region: 'Регион', fort: 'Крепость', plain: 'Равнина', mine: 'Моя территория', capital: 'Столица',
       attack: 'Атаковать', timeLimit: 'Время', reward: 'Награда', notAdj: 'Атаковать можно только соседние с вашей территорией', cooling: 'Перезарядка: {n} ходов', upgrade: 'Улучшения', train: 'Тренировка', progress: 'Захвачено {a}/{b}',
       inf: 'Пехота', tank: 'Броня', air: 'Авиация', eng: 'Инженеры', infD: 'Время 6×6 +20 с / ур.', tankD: 'Время 9×9 +45 с / ур.', airD: '+1 подсказка за атаку / ур.', engD: 'Ошибка стоит на 2 с меньше / ур.',
       max: 'МАКС', notEnough: 'Не хватает ресурсов', sdAttack: 'Атака', sdTrain: 'Тренировка', timeUp: 'Время вышло! Атака провалена', timeUpD: 'Эту клетку можно атаковать снова через 2 хода.', captured: 'Захвачено!', fast: 'Бонус за скорость +50%', income: 'Доход за ход',
       retreat: 'Отступить? Эта атака будет отменена.', hint: 'Подсказка', back: 'Назад', erase: 'Стереть', notes: 'Заметки', worldWon: 'Вы завоевали мир!', resetGame: 'Начать войну заново', confirmReset: 'Начать заново? Прогресс будет удалён.',
-      ok: 'Дальше', home: 'Домой', mistakes: 'Ошибки', lvl: 'Ур.', untilEnd: 'Осталось', trainDone: 'Тренировка завершена', menu: 'Меню', cancel: 'Отмена', income2: 'Доход за ход', mistakePen: 'Ошибка -{n} с', hintsLeft: 'Подсказки' },
-    kk: { wTitle: 'Әлемді жаулау', turnN: '{n}-жүріс', pickStart: 'Астананы таңдау үшін картаны басыңыз (сүйреу, екі саусақпен масштаб)', buildCap: 'Осы жерге астана құру', region: 'Аймақ', fort: 'Бекініс', plain: 'Жазық', mine: 'Менің аумағым', capital: 'Астана',
+      ok: 'Дальше', home: 'Домой', mistakes: 'Ошибки', lvl: 'Ур.', untilEnd: 'Осталось', trainDone: 'Тренировка завершена', menu: 'Меню', cancel: 'Отмена', income2: 'Доход за ход', mistakePen: 'Ошибка -{n} с', hintsLeft: 'Подсказки', mapReal: 'Реальная карта', mapSimple: 'Упрощённая карта (подключитесь и обновите)' },
+    kk: { mapReal: 'Карта: нақты әлем картасы ✓', mapSimple: 'Карта: жеңілдетілген (нақты карта жүктелмеді)', mapRetry: 'Нақты картаны қайта жүктеу', mapLate: 'Нақты карта жүктелді; қайта ашыңыз', wTitle: 'Әлемді жаулау', turnN: '{n}-жүріс', pickStart: 'Астананы таңдау үшін картаны басыңыз (сүйреу, екі саусақпен масштаб)', buildCap: 'Осы жерге астана құру', region: 'Аймақ', fort: 'Бекініс', plain: 'Жазық', mine: 'Менің аумағым', capital: 'Астана',
       attack: 'Шабуыл', timeLimit: 'Уақыт', reward: 'Сыйлық', notAdj: 'Тек аумағыңызбен шектесетін аймаққа шабуылдауға болады', cooling: 'Күту: {n} жүріс', upgrade: 'Жақсарту', train: 'Жаттығу', progress: 'Жаулап алынды {a}/{b}',
       inf: 'Жаяу әскер', tank: 'Сауытты', air: 'Әуе күштері', eng: 'Инженерлер', infD: '6×6 уақыты +20 сек / деңгей', tankD: '9×9 уақыты +45 сек / деңгей', airD: 'Әр шабуылға +1 кеңес / деңгей', engD: 'Қателік 2 сек аз алады / деңгей',
       max: 'МАКС', notEnough: 'Ресурс жеткіліксіз', sdAttack: 'Шабуыл', sdTrain: 'Жаттығу', timeUp: 'Уақыт бітті! Шабуыл сәтсіз', timeUpD: 'Бұл аймаққа 2 жүрістен кейін қайта шабуылдауға болады.', captured: 'Жаулап алынды!', fast: 'Жылдамдық бонусы +50%', income: 'Осы жүрістегі табыс',
       retreat: 'Шегінесіз бе? Бұл шабуыл жойылады.', hint: 'Кеңес', back: 'Артқа', erase: 'Өшіру', notes: 'Жазба', worldWon: 'Сіз бүкіл әлемді жаулап алдыңыз!', resetGame: 'Соғысты қайта бастау', confirmReset: 'Қайта бастайсыз ба? Барлық прогресс өшеді.',
-      ok: 'Жалғастыру', home: 'Басты бет', mistakes: 'Қате', lvl: 'Дең.', untilEnd: 'Қалды', trainDone: 'Жаттығу аяқталды', menu: 'Мәзір', cancel: 'Бас тарту', income2: 'Жүріс сайынғы табыс', mistakePen: 'Қате -{n} сек', hintsLeft: 'Кеңес' }
+      ok: 'Жалғастыру', home: 'Басты бет', mistakes: 'Қате', lvl: 'Дең.', untilEnd: 'Қалды', trainDone: 'Жаттығу аяқталды', menu: 'Мәзір', cancel: 'Бас тарту', income2: 'Жүріс сайынғы табыс', mistakePen: 'Қате -{n} сек', hintsLeft: 'Кеңес', mapReal: 'Нақты карта', mapSimple: 'Жеңілдетілген карта (интернетке қосылып жаңартыңыз)' }
   };
   Object.keys(S).forEach(function (l) { if (I.T[l]) Object.assign(I.T[l], S[l]); });
   function t(k, v) { var s = I.t(k); if (v) for (var x in v) s = s.replace('{' + x + '}', v[x]); return s; }
@@ -182,6 +182,8 @@
     $('#b-prog-t').textContent = t('progress', { a: n, b: totalHex });
     $('#b-up-t').textContent = t('upgrade'); $('#b-train-t').textContent = t('train');
     $('#w-hint').textContent = st.start < 0 ? t('pickStart') : '';
+    $('#w-map').textContent = W.real ? '🌍 ' + t('mapReal') : '⚠ ' + t('mapSimple');
+    $('#w-map').className = 'mapnote' + (W.real ? '' : ' warn');
     $('#t-erase-t').textContent = t('erase'); $('#t-notes-t').textContent = t('notes');
     document.title = t('wTitle');
     draw();
@@ -319,10 +321,14 @@
   $('#b-train').addEventListener('click', function () { startSudoku({ kind: 'train' }); });
   $('#w-home').addEventListener('click', function () { location.href = './'; });
   $('#w-menu').addEventListener('click', function () {
-    showModal(t('menu'), [t('wTitle')], [
+    var body = [W.status.real ? t('mapReal') : t('mapSimple')];
+    if (!W.status.real && W.status.errors.length) { var sm = el('small', '', W.status.errors.join(' | ')); sm.style.cssText = 'color:#8aa0b0;word-break:break-all'; body.push(sm); }
+    showModal(t('menu'), body, [
+      { label: t('mapRetry'), fn: function () { try { localStorage.removeItem('sdk_topo2'); } catch (e) {} location.reload(); } },
       { label: t('resetGame'), fn: function () { if (confirm(t('confirmReset'))) { st = JSON.parse(JSON.stringify(DEF)); owned = {}; sel = null; save(); $('#panel').hidden = true; refresh(); focusDefault(); } } },
       { label: t('cancel') }]);
   });
+  W.onLate = function () { if (st.start < 0 && !Object.keys(owned).length) location.reload(); else toast(t('mapLate')); };
   window.addEventListener('resize', resize);
   function focusDefault() { var h = W.byId[st.start]; if (h) focus(h, 1); else { view.k = Math.max(vw / worldW, vh / worldH) * 1.35; var c = [worldW * 0.58, worldH * 0.34]; view.x = vw / 2 - c[0] * view.k; view.y = vh / 2 - c[1] * view.k; clamp(); draw(); } }
   resize(); refresh(); focusDefault();
