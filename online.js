@@ -216,12 +216,13 @@
   }
   function showResult(win, secs, oppSecs) {
     var body = [A.el('div', 'big-time', A.fmt(secs))];
+    if (L.myDone && L.gain) body.push(A.el('div', 'gain', '+' + L.gain + ' 💎'));
     if (oppSecs !== undefined) body.push(t('opponent') + ': ' + A.fmt(oppSecs));
     if (!L.host) body.push(t('waitHost'));
     A.showInfo({ title: win ? t('youWon') : t('youLost'), body: body, buttons: resultButtons() });
   }
   function onMyDone(secs) {
-    L.myDone = true; L.mySecs = secs;
+    L.myDone = true; L.mySecs = secs; L.gain = A.awardBattle();
     send('done', { id: L.id, secs: secs });
     if (window.Track) Track.log('battle_win', { mode: 'battle', diff: L.diff, secs: secs });
     showResult(true, secs);
