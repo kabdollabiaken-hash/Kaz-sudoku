@@ -45,8 +45,9 @@
   function cityName(i) { return W.CITIES[i][LI[I.get()] || 2]; }
 
   /* ---------- state ---------- */
-  var DEF = { v: 1, start: -1, owned: [], g: 0, s: 0, up: { inf: 0, tank: 0, air: 0, eng: 0 }, turn: 1, cd: {}, att: 0 };
-  var st = Object.assign({}, DEF, LS.get('sdk_war', {}));
+  var DEF = { map: 3, v: 1, start: -1, owned: [], g: 0, s: 0, up: { inf: 0, tank: 0, air: 0, eng: 0 }, turn: 1, cd: {}, att: 0 };
+  var saved = LS.get('sdk_war', {}) || {};
+  var st = Object.assign({}, DEF, saved.map === DEF.map ? saved : {});
   st.up = Object.assign({}, DEF.up, st.up || {});
   st.owned = st.owned.filter(function (id) { return W.byId[id]; });
   if (st.start >= 0 && !W.byId[st.start]) { st.start = -1; st.owned = []; }
@@ -90,10 +91,11 @@
   function lonX(lon) { return (lon + 180) / W.DLON * HW; }
   function latY(lat) { return (W.LAT0 - lat) / W.DLAT * 1.5 * SZ + SZ; }
   var LC = {};
+  var PAL = ['#6f9361', '#8c9c5c', '#a89b63', '#7b9b90', '#a08a68', '#6f8fae', '#9d8294', '#86a06e', '#b09a72', '#75a3a0'];
   function landColor(name) {
     if (LC[name]) return LC[name];
     var h = 0; for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-    return (LC[name] = 'hsl(' + (70 + h % 60) + ',' + (20 + (h >> 3) % 10) + '%,' + (27 + (h >> 5) % 9) + '%)');
+    return (LC[name] = PAL[h % PAL.length]);
   }
   var labelsCache = null;
   function countryLabels() {
@@ -115,12 +117,12 @@
         ctx.closePath();
       }
       ctx.fillStyle = landColor(p.name || 'x'); ctx.fill('evenodd');
-      ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(225,238,250,.4)'; ctx.stroke();
+      ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.stroke();
     }
   }
   function drawCountryNames() {
     if (!W.real) return;
-    ctx.font = '600 ' + 12 + 'px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,255,255,.38)';
+    ctx.font = '600 ' + 12 + 'px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(20,30,20,.55)';
     countryLabels().forEach(function (l) { if (l.w * view.k > 80) ctx.fillText(l.n.toUpperCase(), l.x, l.y); });
   }
   function draw() {
@@ -139,7 +141,7 @@
       hexPath(c[0], c[1]);
       var fs = mine ? (fort ? 'rgba(59,134,214,.62)' : 'rgba(47,111,176,.55)') : (cd > 0 && canAtk ? 'rgba(60,60,60,.7)' : (fort ? 'rgba(150,100,50,.4)' : ''));
       if (fs) { ctx.fillStyle = fs; ctx.fill(); }
-      ctx.lineWidth = mine ? 1.6 : 0.8; ctx.strokeStyle = mine ? '#8cc2ff' : 'rgba(255,255,255,.17)'; ctx.stroke();
+      ctx.lineWidth = mine ? 1.6 : 0.6; ctx.strokeStyle = mine ? '#bfe0ff' : 'rgba(0,0,0,.22)'; ctx.stroke();
       if (canAtk && cd === 0) { hexPath(c[0], c[1]); ctx.lineWidth = 2.2; ctx.strokeStyle = '#ff6b5f'; ctx.stroke(); }
       if (sel && sel.id === h.id) { hexPath(c[0], c[1]); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke(); }
       var ico = '';
