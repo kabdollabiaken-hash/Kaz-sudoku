@@ -105,7 +105,7 @@
     return out;
   }
 
-  var COLS = 60, ROWS = 28, DLON = 6, DLAT = 5.196, LAT0 = 82;
+  var COLS = 90, ROWS = 41, DLON = 4, DLAT = 3.464, LAT0 = 82;
   function hexLonLat(col, row) { return [-180 + (col + 0.5 * (row & 1) + 0.5) * DLON, LAT0 - row * DLAT]; }
 
   function build(polys, useCaspian) {
@@ -115,7 +115,7 @@
       var ll = hexLonLat(c, r), cnt = 0, cn = '', p0 = land(ll[0], ll[1]);
       if (p0) { cnt += 2; cn = p0.name; }
       for (var k = 0; k < 6; k++) {
-        var a = Math.PI / 3 * k - Math.PI / 6, p = land(ll[0] + Math.cos(a) * 3.2, ll[1] + Math.sin(a) * 2.9);
+        var a = Math.PI / 3 * k - Math.PI / 6, p = land(ll[0] + Math.cos(a) * DLON / 1.732 * 0.92, ll[1] + Math.sin(a) * DLAT / 1.5 * 0.92);
         if (p) { cnt++; if (!cn) cn = p.name; }
       }
       if (cnt >= 4) {
@@ -153,8 +153,8 @@
     return out;
   }
 
-  var WM = { fallbackPolys: FALLBACK, COLS: COLS, ROWS: ROWS, hexes: [], byId: {}, CITIES: CITIES, neighbors: neighbors, real: false, decodeTopo: decodeTopo, build: build };
-  function apply(polys, caspian, real) { var b = build(polys, caspian); WM.hexes = b.hexes; WM.byId = b.byId; WM.real = !!real; }
+  var WM = { fallbackPolys: FALLBACK, polys: FALLBACK, DLON: DLON, DLAT: DLAT, LAT0: LAT0, COLS: COLS, ROWS: ROWS, hexes: [], byId: {}, CITIES: CITIES, neighbors: neighbors, real: false, decodeTopo: decodeTopo, build: build };
+  function apply(polys, caspian, real) { var b = build(polys, caspian); WM.hexes = b.hexes; WM.byId = b.byId; WM.polys = polys; WM.real = !!real; }
   apply(FALLBACK, true, false);
 
   // Real world map: world-atlas TopoJSON (cached after the first successful download).
