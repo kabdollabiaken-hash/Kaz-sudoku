@@ -99,10 +99,10 @@
   Object.assign(T.zh, {"v0": "滑板", "c0": "阿斯塔纳", "f0": "阿斯塔纳自 1997 年起成为哈萨克斯坦首都。", "v1": "自行车", "c1": "卡拉干达", "f1": "卡拉干达是哈萨克斯坦中部的煤炭和工业城市。", "v2": "摩托车", "c2": "巴尔喀什", "f2": "巴尔喀什湖很特别：一半是淡水，一半是咸水。", "v3": "轿车", "c3": "阿拉木图", "f3": "阿拉木图是哈萨克斯坦最大的城市，坐落在外伊犁阿拉套山脚下。", "v4": "越野车", "c4": "塔拉兹", "f4": "塔拉兹是哈萨克斯坦最古老的城市之一，已有 2000 多年历史。", "v5": "卡车", "c5": "奇姆肯特", "f5": "奇姆肯特是哈萨克斯坦第三大城市。", "upgrade": "升级", "arrived": "到达{c}！", "journeyDone": "旅程完成！你已到达奇姆肯特。", "awesome": "太棒了！", "carHint": "解数独赚 💎 升级"});
   Object.assign(T.en, {"v0": "Skateboard", "c0": "Astana", "f0": "Astana has been the capital of Kazakhstan since 1997.", "v1": "Bike", "c1": "Karaganda", "f1": "Karaganda is a coal and industrial city in central Kazakhstan.", "v2": "Motorbike", "c2": "Balkhash", "f2": "Lake Balkhash is unusual: half fresh water, half salt water.", "v3": "Car", "c3": "Almaty", "f3": "Almaty is the largest city in Kazakhstan, at the foot of the Zailiysky Alatau.", "v4": "SUV", "c4": "Taraz", "f4": "Taraz is one of the oldest cities in Kazakhstan, over 2,000 years old.", "v5": "Truck", "c5": "Shymkent", "f5": "Shymkent is the third-largest city in Kazakhstan.", "upgrade": "Upgrade", "arrived": "You reached {c}!", "journeyDone": "Journey complete! You reached Shymkent.", "awesome": "Awesome!", "carHint": "Solve sudoku to earn 💎"});
 
-  Object.assign(T.zh, { wTitle: '世界征服', warSub: '解数独，占领全世界', warOwned: '已占领 {n} 个区域' });
-  Object.assign(T.en, { wTitle: 'World Conquest', warSub: 'Solve sudoku to conquer the world', warOwned: '{n} regions captured' });
-  Object.assign(T.ru, { wTitle: 'Завоевание мира', warSub: 'Решай судоку — захватывай мир', warOwned: 'Захвачено регионов: {n}' });
-  Object.assign(T.kk, { wTitle: 'Әлемді жаулау', warSub: 'Судоку шешіп әлемді жаула', warOwned: 'Жаулап алынды: {n}' });
+  Object.assign(T.zh, { wTitle: '世界征服', warSub: '数独指挥战争，保卫哈萨克斯坦', warOwned: '战役进行中 · 第 {n}/30 回合' });
+  Object.assign(T.en, { wTitle: 'World Conquest', warSub: 'Solve sudoku to conquer the world', warOwned: 'Campaign · turn {n}/30' });
+  Object.assign(T.ru, { wTitle: 'Завоевание мира', warSub: 'Решай судоку — захватывай мир', warOwned: 'Кампания · ход {n}/30' });
+  Object.assign(T.kk, { wTitle: 'Әлемді жаулау', warSub: 'Судоку шешіп әлемді жаула', warOwned: 'Жорық · {n}/30 жүріс' });
 
   var cur = 'en';
 
