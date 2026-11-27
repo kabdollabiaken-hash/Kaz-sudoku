@@ -14,7 +14,7 @@
   <header id="topbar">
     <button id="w-home" class="ib" type="button" aria-label="Back">←</button>
     <div id="w-turn" class="turn"></div>
-    <div class="res"><span>🪙 <b id="r-g">0</b></span><span>⚙️ <b id="r-s">0</b></span><span>💎 <b id="r-d">0</b></span></div>
+    <div class="res"><span>🪙 <b id="r-g">0</b></span><span>💎 <b id="r-d">0</b></span></div>
     <button id="w-menu" class="ib" type="button" aria-label="Menu">☰</button>
   </header>
 
@@ -28,26 +28,8 @@
 
   <footer id="bottombar">
     <button id="b-up" class="bb" type="button"><span class="bi">🛠️</span><span id="b-up-t"></span></button>
-    <button id="b-train" class="bb" type="button"><span class="bi">🎯</span><span id="b-train-t"></span></button>
     <button id="b-end" class="bb endb" type="button"><span class="bi">⏭️</span><span id="b-end-t"></span></button>
   </footer>
-
-  <!-- sudoku -->
-  <section id="screen-sd" hidden>
-    <div class="sd-top">
-      <button id="sd-back" class="ib" type="button" aria-label="Back">←</button>
-      <div id="sd-title" class="sd-title"></div>
-      <div id="sd-time" class="sd-time">--:--</div>
-    </div>
-    <div class="sd-sub"><span id="sd-mist"></span><span id="sd-info"></span></div>
-    <div id="board-wrap"><div id="board"></div></div>
-    <div class="tools">
-      <button id="t-erase" class="tool" type="button"><span class="ti">⌫</span><span id="t-erase-t"></span></button>
-      <button id="t-notes" class="tool" type="button"><span class="ti">✎</span><span id="t-notes-t"></span></button>
-      <button id="t-hint" class="tool" type="button"><span class="ti">💡</span><span id="t-hint-t"></span></button>
-    </div>
-    <div id="pad" class="pad"></div>
-  </section>
 
   <div id="modal" class="modal" hidden>
     <div class="sheet">
@@ -58,7 +40,6 @@
   </div>
   <div id="toast" class="toast"></div>
 </div>
-<script src="core.js"></script>
 <script src="i18n.js"></script>
 <script src="world.js"></script>
 <script src="war.js"></script>
