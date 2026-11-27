@@ -124,11 +124,11 @@
     if (hints > 0) a = Math.max(1, Math.floor(a / 2));
     return a;
   }
-  function addGems(n) { stats.gems = (stats.gems || 0) + n; }
+  function addGems(n) { stats.gems = (stats.gems || 0) + n; stats.coins = (stats.coins || 0) + n * 30; }
   function renderWar() {
-    $('#gem-txt').textContent = stats.gems || 0;
+    $('#gem-txt').textContent = (stats.gems || 0) + ' · 🪙' + (stats.coins || 0);
     var w = LS.get('sdk_war', null), n = w && w.map >= 5 && w.turn ? w.turn : 0;
-    $('#war-sub').textContent = n > 0 ? t('warOwned').replace('{n}', Math.min(n, 30)) : t('warSub');
+    $('#war-sub').textContent = n > 0 ? t('warOwned').replace('{n}', Math.min(n, 80)) : t('warSub');
   }
 
   function renderHome() {
