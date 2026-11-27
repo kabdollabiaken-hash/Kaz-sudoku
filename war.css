@@ -82,3 +82,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .mapnote { position: absolute; right: 8px; bottom: 6px; font-size: 11px; color: var(--muted); background: rgba(10,20,28,.7); padding: 3px 8px; border-radius: 8px; pointer-events: none; }
 .mapnote.warn { color: #ffb74d; }
+.bb.endb{flex:1;justify-content:center;background:linear-gradient(#e5584f,#b83a33);border-color:#ff8a80;color:#fff;font-size:16px;font-weight:800}
+.rbtns{display:flex;flex-wrap:wrap;gap:6px}.btn.small{min-height:38px;font-size:13px;flex:1 1 45%;padding:0 8px}
