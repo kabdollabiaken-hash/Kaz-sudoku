@@ -127,8 +127,8 @@
   function addGems(n) { stats.gems = (stats.gems || 0) + n; }
   function renderWar() {
     $('#gem-txt').textContent = stats.gems || 0;
-    var w = LS.get('sdk_war', null), n = w && w.owned ? w.owned.length : 0;
-    $('#war-sub').textContent = n > 0 ? t('warOwned').replace('{n}', n) : t('warSub');
+    var w = LS.get('sdk_war', null), n = w && w.map >= 5 && w.turn ? w.turn : 0;
+    $('#war-sub').textContent = n > 0 ? t('warOwned').replace('{n}', Math.min(n, 30)) : t('warSub');
   }
 
   function renderHome() {
