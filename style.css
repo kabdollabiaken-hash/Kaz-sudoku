@@ -328,3 +328,14 @@ button.pill-gem { border: 0; font: inherit; font-size: 12px; font-weight: 700; c
 .shop-card .shop-buy { position: relative; width: 100%; min-height: 40px; border: 0; border-radius: 14px; font-size: 15px; font-weight: 800; color: #fff; cursor: pointer; background: linear-gradient(100deg, #36a8ff, #6a6cf5); box-shadow: 0 4px 12px rgba(90, 110, 240, .35); }
 .shop-card .shop-buy:active { transform: scale(.97); }
 .shop-card .shop-buy:disabled { background: var(--line); color: var(--muted); box-shadow: none; }
+
+#item-bar { gap: 6px; flex-wrap: wrap; }
+.item-btn { width: 46px; height: 44px; font-size: 22px; }
+.cell.scorch .v, .cell.scorch .n { opacity: 0; }
+.cell.scorch::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 40% 45%, rgba(15, 23, 42, .93) 25%, rgba(30, 41, 59, .8) 70%, rgba(71, 85, 105, .4)); pointer-events: none; z-index: 2; }
+.smoke-ov { position: absolute; z-index: 8; display: grid; place-items: center; font-size: 34px; border-radius: 8px; cursor: pointer; transition: opacity .25s; background: radial-gradient(circle at 35% 35%, rgba(241, 245, 249, .98) 28%, rgba(203, 213, 225, .94) 65%, rgba(148, 163, 184, .85)); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); box-shadow: 0 4px 12px rgba(100, 116, 139, .3); animation: smoke-sw 2.4s infinite alternate ease-in-out; }
+@keyframes smoke-sw { from { transform: scale(.98) rotate(-1deg); } to { transform: scale(1.04) rotate(1.2deg); } }
+.blast-ring { position: absolute; z-index: 9; width: 150px; height: 150px; border-radius: 50%; border: 4px solid #f97316; background: radial-gradient(circle, rgba(254, 215, 170, .85), rgba(239, 68, 68, .4) 60%, transparent); pointer-events: none; transform: translate(-50%, -50%) scale(.1); animation: blast-x .55s ease-out forwards; }
+@keyframes blast-x { 0% { opacity: 1; transform: translate(-50%, -50%) scale(.1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
+#board-wrap.shield-on::after { content: ''; position: absolute; inset: -4px; border-radius: 12px; pointer-events: none; z-index: 7; border: 3px solid #38bdf8; background: radial-gradient(circle at 30% 25%, rgba(186, 230, 253, .28), rgba(14, 165, 233, .1) 70%, rgba(2, 132, 199, .25)); animation: shield-p 2s infinite ease-in-out; }
+@keyframes shield-p { 0%, 100% { box-shadow: 0 0 18px 3px rgba(56, 189, 248, .55); } 50% { box-shadow: 0 0 30px 9px rgba(56, 189, 248, .85); } }
