@@ -286,3 +286,14 @@ input.sw:checked::after { transform: translateX(20px); }
 .car-bar { height: 8px; border-radius: 4px; background: var(--tile); overflow: hidden; }
 .car-bar i { display: block; height: 100%; background: linear-gradient(90deg, #36a8ff, #6a6cf5); border-radius: 4px; transition: width .4s; }
 .btn.small:disabled { opacity: .45; }
+
+
+.btn.quick { width: 100%; min-height: 52px; font-size: 17px; margin-bottom: 4px; }
+.pubrow { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin: 4px 0 8px; }
+.pubrow input { width: 18px; height: 18px; accent-color: var(--accent, #5468ea); }
+.rooms { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.room-row { display: flex; align-items: center; gap: 10px; background: var(--tile); border-radius: 12px; padding: 8px 10px; }
+.room-row .rn { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room-row .rd { color: var(--muted); font-size: 13px; }
+.room-row .btn.small { min-height: 34px; padding: 0 14px; flex: none; }
+.center-note { text-align: center; padding: 10px 0; }
