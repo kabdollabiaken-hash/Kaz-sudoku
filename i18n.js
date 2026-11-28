@@ -96,6 +96,10 @@
 
 
 
+  Object.assign(T.zh, { quickMatch: '⚡ 快速匹配', publicRoom: '公开房间（别人可直接加入）', publicRooms: '公开房间', noPublic: '暂时没有公开房间', searching: '正在匹配对手…', matched: '已匹配到对手' });
+  Object.assign(T.en, { quickMatch: '⚡ Quick match', publicRoom: 'Public room (anyone can join)', publicRooms: 'Open rooms', noPublic: 'No open rooms right now', searching: 'Looking for an opponent…', matched: 'Opponent found' });
+  Object.assign(T.ru, { quickMatch: '⚡ Быстрый поиск', publicRoom: 'Открытая комната (любой может войти)', publicRooms: 'Открытые комнаты', noPublic: 'Сейчас нет открытых комнат', searching: 'Ищем соперника…', matched: 'Соперник найден' });
+  Object.assign(T.kk, { quickMatch: '⚡ Жылдам іздеу', publicRoom: 'Ашық бөлме (кез келген адам кіре алады)', publicRooms: 'Ашық бөлмелер', noPublic: 'Қазір ашық бөлме жоқ', searching: 'Қарсылас іздеудеміз…', matched: 'Қарсылас табылды' });
   var cur = 'en';
 
   function detect() {
