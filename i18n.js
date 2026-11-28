@@ -100,6 +100,10 @@
   Object.assign(T.en, { quickMatch: '⚡ Quick match', publicRoom: 'Public room (anyone can join)', publicRooms: 'Open rooms', noPublic: 'No open rooms right now', searching: 'Looking for an opponent…', matched: 'Opponent found' });
   Object.assign(T.ru, { quickMatch: '⚡ Быстрый поиск', publicRoom: 'Открытая комната (любой может войти)', publicRooms: 'Открытые комнаты', noPublic: 'Сейчас нет открытых комнат', searching: 'Ищем соперника…', matched: 'Соперник найден' });
   Object.assign(T.kk, { quickMatch: '⚡ Жылдам іздеу', publicRoom: 'Ашық бөлме (кез келген адам кіре алады)', publicRooms: 'Ашық бөлмелер', noPublic: 'Қазір ашық бөлме жоқ', searching: 'Қарсылас іздеудеміз…', matched: 'Қарсылас табылды' });
+  Object.assign(T.zh, { sfxSound: '音效', sfxSoundD: '落子、错误、完成一行的声音', sfxFx: '特效与震动', sfxFxD: '完成行/列/宫格的动画和震动' });
+  Object.assign(T.en, { sfxSound: 'Sound', sfxSoundD: 'Sounds for moves, mistakes and completions', sfxFx: 'Effects & vibration', sfxFxD: 'Animations when a row, column or box is done' });
+  Object.assign(T.ru, { sfxSound: 'Звуки', sfxSoundD: 'Звуки ходов, ошибок и завершений', sfxFx: 'Эффекты и вибрация', sfxFxD: 'Анимации при завершении строки, столбца, блока' });
+  Object.assign(T.kk, { sfxSound: 'Дыбыс', sfxSoundD: 'Жүріс, қате және аяқтау дыбыстары', sfxFx: 'Эффект және діріл', sfxFxD: 'Жол, баған, блок аяқталғандағы анимация' });
   var cur = 'en';
 
   function detect() {
