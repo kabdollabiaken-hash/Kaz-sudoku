@@ -205,6 +205,7 @@
       ch.on('broadcast', { event: 'start' }, function (m) { if (L.ch === ch) onStart(m.payload); });
       ch.on('broadcast', { event: 'hit' }, function (m) { if (L.ch === ch && L.inGame && !L.over && m.payload) A.receiveHit(m.payload.dmg | 0); });
       ch.on('broadcast', { event: 'hp' }, function (m) { if (L.ch === ch && L.inGame && m.payload) A.setOppHp(m.payload.hp | 0); });
+      ch.on('broadcast', { event: 'freeze' }, function (m) { if (L.ch === ch && L.inGame && !L.over && m.payload) A.receiveFreeze(m.payload.sec | 0); });
       ch.on('broadcast', { event: 'ko' }, function (m) { if (L.ch === ch) onOppKo(); });
       ch.on('broadcast', { event: 'done' }, function (m) { if (L.ch === ch) onOppDone(m.payload || {}); });
       ch.subscribe(function (status) {
@@ -268,6 +269,7 @@
         A.startBattleGame({
           seed: p.seed, diff: p.diff,
           onHit: function (dmg) { send('hit', { id: L.id, dmg: dmg }); },
+          onFreeze: function (sec) { send('freeze', { id: L.id, sec: sec }); },
           onHp: function (hp) { send('hp', { id: L.id, hp: hp }); },
           onKo: function (secs) { L.over = true; send('ko', { id: L.id }); showResult(false, secs); },
           onDone: onMyDone,
