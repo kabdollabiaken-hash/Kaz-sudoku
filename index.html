@@ -134,6 +134,7 @@
     <div class="page">
       <div id="on-notcfg" class="notice" hidden data-i18n="notConfigured"></div>
       <div id="on-menu">
+        <button id="on-quick" class="btn primary quick" type="button" data-i18n="quickMatch">Quick match</button>
         <div class="card">
           <div class="card-title"><span data-i18n="createRoom">Create room</span></div>
           <div class="seg" id="on-diffs">
@@ -141,7 +142,12 @@
             <button type="button" data-od="medium" class="on" data-i18n="medium">Medium</button>
             <button type="button" data-od="hard" data-i18n="hard">Hard</button>
           </div>
+          <label class="pubrow"><input id="on-pub" type="checkbox" checked><span data-i18n="publicRoom">Public room</span></label>
           <button id="on-create" class="btn primary" type="button" data-i18n="createRoom">Create room</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><span data-i18n="publicRooms">Open rooms</span></div>
+          <div id="on-rooms" class="rooms"></div>
         </div>
         <div class="card">
           <div class="card-title"><span data-i18n="joinRoom">Join room</span></div>
