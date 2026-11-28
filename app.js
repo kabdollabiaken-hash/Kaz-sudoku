@@ -181,7 +181,7 @@
     $('#g-restart').hidden = G.mode === 'battle';
     $('#g-pause').innerHTML = ico(G.paused ? 'i-play' : 'i-pause');
     $('#pause-overlay').hidden = !G.paused;
-    setBattleBars(0, 0);
+    setBattleBars(G.mode === 'battle' ? 100 : 0, G.mode === 'battle' ? 100 : 0);
     show('game');
     renderAll();
   }
@@ -200,7 +200,9 @@
   }
   function startBattleGame(o) {
     var g = makeGame('battle', o.diff, o.seed);
-    g.battle = o;
+    g.battle = o; g.hp = 100; g.oppHp = 100; g.dealt = {};
+    var empt = 0; for (var q = 0; q < g.n * g.n; q++) if (!g.puz[q]) empt++;
+    g.base = 50 / Math.max(1, empt); g.ub = 50 / (3 * g.n);
     enterGame(g);
   }
 
@@ -468,11 +470,41 @@
       if (G.cur[G.sel] === G.sol[G.sel]) fxCorrect(G.sel); else fxMistake();
     }
     if (G.mode === 'battle') {
-      var p = progressPct();
-      setBattleBars(p, null);
-      if (G.battle && G.battle.onProgress) G.battle.onProgress(p, G.mist);
+      var sel = G.sel;
+      if (!noWinCheck && sel !== null && !G.puz[sel] && G.cur[sel]) {
+        if (G.cur[sel] !== G.sol[sel]) selfHit(8);
+        else if (!G.dealt[sel]) {
+          G.dealt[sel] = 1;
+          var nu = fxUnits(sel).length, dmg = Math.max(1, Math.round(G.base + nu * G.ub));
+          if (G.battle && G.battle.onHit) G.battle.onHit(dmg);
+          if (!nu && settings.effects !== false) floatLabel('⚔️ -' + dmg, 26, '#ff7a4a');
+        }
+      }
     } else save();
     if (!noWinCheck && isSolved()) finish();
+  }
+
+  /* ---- battle HP ---- */
+  function hpColor(h) { return h > 60 ? '#3fcf6a' : h > 30 ? '#f2c14e' : '#ee5a50'; }
+  function ko() {
+    if (!G || G.finished) return;
+    tick(); G.finished = true; renderAll(); sfx('bad');
+    var secs = Math.floor(G.ms / 1000);
+    if (G.battle && G.battle.onKo) G.battle.onKo(secs);
+  }
+  function selfHit(d) {
+    if (!G || G.finished) return;
+    G.hp = Math.max(0, G.hp - d); setBattleBars(G.hp, null);
+    if (G.battle && G.battle.onHp) G.battle.onHp(G.hp);
+    if (G.hp <= 0) ko();
+  }
+  function receiveHit(d) {
+    if (!G || G.finished || G.mode !== 'battle') return;
+    G.hp = Math.max(0, G.hp - (d | 0)); setBattleBars(G.hp, null);
+    if (settings.effects !== false) { flash('rgba(255,40,40,.35)'); var b = $('#board'); if (b && b.animate) b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 240 }); floatLabel('💔 -' + (d | 0), 28, '#ff4d42'); }
+    sfx('bad'); vib(50);
+    if (G.battle && G.battle.onHp) G.battle.onHp(G.hp);
+    if (G.hp <= 0) ko();
   }
 
   function finish() {
@@ -612,8 +644,8 @@
   }
 
   function setBattleBars(you, opp) {
-    if (you !== null) { $('#bb-you').style.width = you + '%'; $('#bb-you-pct').textContent = you + '%'; }
-    if (opp !== null) { $('#bb-opp').style.width = opp + '%'; $('#bb-opp-pct').textContent = opp + '%'; }
+    if (you !== null) { $('#bb-you').style.width = you + '%'; $('#bb-you').style.background = hpColor(you); $('#bb-you-pct').textContent = '❤️' + you; }
+    if (opp !== null) { $('#bb-opp').style.width = opp + '%'; $('#bb-opp').style.background = hpColor(opp); $('#bb-opp-pct').textContent = '❤️' + opp; }
   }
 
   /* ---------- settings ---------- */
@@ -737,7 +769,9 @@
   window.App = {
     t: t, show: show, toast: toast, showInfo: showInfo, closeModal: closeModal, fmt: fmt, el: el,
     startBattleGame: startBattleGame, awardBattle: awardBattle,
-    setOppProgress: function (p) { setBattleBars(null, p); },
+    setOppHp: function (h) { if (G && G.mode === 'battle') { G.oppHp = h | 0; setBattleBars(null, G.oppHp); } },
+    receiveHit: receiveHit,
+    winByKo: function () { if (G && G.mode === 'battle' && !G.finished) finish(); },
     freeze: function () { if (G) { tick(); G.finished = true; renderAll(); } },
     getSettings: function () { return settings; },
     displayName: displayName,
