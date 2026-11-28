@@ -335,17 +335,64 @@
     o.connect(g); g.connect(a.destination); o.start(s); o.stop(s + d + .05);
   }
   function arp(notes, gap, d, type, vol) { notes.forEach(function (f, k) { tone(f, k * gap, d, type, vol); }); }
-  function sfx(name) {
+  var PENT = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1568];
+  function rnd(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function bell(f, t0, d, vol) {
+    var a = ac(); if (!a) return; var s = a.currentTime + t0, g = a.createGain(), o = a.createOscillator(), m = a.createOscillator(), mg = a.createGain();
+    o.type = 'sine'; o.frequency.value = f; m.type = 'sine'; m.frequency.value = f * 3.5; mg.gain.setValueAtTime(f * 1.6, s); mg.gain.exponentialRampToValueAtTime(1, s + d * .7);
+    m.connect(mg); mg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, s); g.gain.linearRampToValueAtTime(vol || .13, s + .006); g.gain.exponentialRampToValueAtTime(.0006, s + d);
+    o.connect(g); g.connect(a.destination); o.start(s); m.start(s); o.stop(s + d + .05); m.stop(s + d + .05);
+    tone(f * 2.76, t0, d * .45, 'sine', (vol || .13) * .3);
+  }
+  function marimba(f, t0, vol) { tone(f, t0, .28, 'sine', vol || .16); tone(f * 4, t0, .07, 'sine', (vol || .16) * .5); }
+  function noise(t0, d, freq, q, vol, sweepTo) {
+    var a = ac(); if (!a) return; var n = Math.floor(a.sampleRate * d), buf = a.createBuffer(1, n, a.sampleRate), data = buf.getChannelData(0);
+    for (var k = 0; k < n; k++) data[k] = Math.random() * 2 - 1;
+    var src = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), s = a.currentTime + t0;
+    src.buffer = buf; f.type = 'bandpass'; f.frequency.setValueAtTime(freq, s); if (sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, s + d); f.Q.value = q || 1;
+    g.gain.setValueAtTime(0.0001, s); g.gain.linearRampToValueAtTime(vol || .1, s + d * .15); g.gain.exponentialRampToValueAtTime(.0005, s + d);
+    src.connect(f); f.connect(g); g.connect(a.destination); src.start(s); src.stop(s + d);
+  }
+  function kick(t0, vol) {
+    var a = ac(); if (!a) return; var s = a.currentTime + t0, o = a.createOscillator(), g = a.createGain();
+    o.frequency.setValueAtTime(160, s); o.frequency.exponentialRampToValueAtTime(40, s + .16); g.gain.setValueAtTime(vol || .3, s); g.gain.exponentialRampToValueAtTime(.001, s + .2);
+    o.connect(g); g.connect(a.destination); o.start(s); o.stop(s + .22);
+  }
+  function sparkle(t0, n, vol) { for (var k = 0; k < n; k++) bell(rnd([1568, 1760, 2093, 2349, 2637, 3136]), t0 + k * (.04 + Math.random() * .04), .35, vol || .06); }
+  function coin(t0) { tone(988, t0, .09, 'square', .07); tone(1319, t0 + .08, .45, 'square', .07); bell(1976, t0 + .08, .5, .07); }
+  function sfx(name, v) {
     if (settings.sound === false) return;
     try {
-      if (name === 'ok') tone(660, 0, .09, 'triangle', .12);
-      else if (name === 'bad') { tone(150, 0, .2, 'sawtooth', .1); tone(110, .09, .22, 'sawtooth', .09); }
-      else if (name === 'line') arp([523, 659, 784], .07, .22, 'triangle', .14);
-      else if (name === 'combo') arp([523, 659, 784, 1047], .06, .24, 'triangle', .15);
-      else if (name === 'mega') { arp([523, 659, 784, 1047, 1319, 1568], .05, .26, 'triangle', .15); tone(2093, .3, .5, 'sine', .08); }
-      else if (name === 'streak') arp([880, 1175], .06, .14, 'sine', .12);
-      else if (name === 'win') { arp([523, 523, 523, 659, 784, 659, 784, 1047], .11, .3, 'triangle', .16); tone(1047, .95, .8, 'square', .06); tone(1319, .95, .8, 'sine', .1); }
-    } catch (e) {}
+      if (name === 'ok') marimba(PENT[((v || 1) - 1) % PENT.length], 0, .17);
+      else if (name === 'bad') { tone(150, 0, .2, 'sawtooth', .1); tone(110, .09, .22, 'sawtooth', .09); kick(0, .18); }
+      else if (name === 'line') {
+        var k = Math.floor(Math.random() * 3);
+        if (k === 0) [0, 2, 4, 5].forEach(function (x, n) { bell(PENT[x], n * .07, .5, .13); });
+        else if (k === 1) { coin(0); sparkle(.15, 3, .05); }
+        else { [0, 1, 2, 3, 4, 5, 6].forEach(function (x, n) { marimba(PENT[x], n * .045, .12); }); bell(1568, .32, .6, .1); }
+      }
+      else if (name === 'combo') {
+        noise(0, .35, 800, 1.2, .07, 6000);
+        [0, 2, 4, 5].forEach(function (x, n) { bell(PENT[x], .12 + n * .06, .7, .14); });
+        bell(PENT[7], .42, 1, .12); sparkle(.4, 6, .06);
+        if (Math.random() < .5) coin(.6);
+      }
+      else if (name === 'mega') {
+        kick(0, .3); noise(0, .5, 1200, .8, .1, 8000);
+        [0, 2, 3, 4, 5, 7, 8].forEach(function (x, n) { bell(PENT[x], .1 + n * .055, .9, .15); });
+        [523, 659, 784, 1047].forEach(function (f) { tone(f, .5, .9, 'triangle', .07); });
+        sparkle(.45, 14, .07); noise(.55, 1.1, 5000, .5, .08); coin(.9);
+      }
+      else if (name === 'streak') { coin(0); }
+      else if (name === 'win') {
+        kick(0, .35); kick(.45, .3); noise(0, .6, 1000, .7, .12, 9000);
+        [523, 523, 523, 659, 784, 659, 784, 1047].forEach(function (f, n) { tone(f, .1 + n * .12, .35, 'square', .06); bell(f, .1 + n * .12, .8, .12); });
+        [523, 659, 784, 1047, 1319].forEach(function (f) { tone(f, 1.1, 1.6, 'triangle', .08); bell(f, 1.1, 1.8, .1); });
+        for (var c = 0; c < 18; c++) noise(1.1 + c * .09, .18, 2500 + Math.random() * 3000, .9, .05 + Math.random() * .03);
+        sparkle(1.15, 24, .07); kick(1.1, .3); noise(1.1, 1.8, 6000, .4, .08);
+      }
+    } catch (e) { if (window.console) console.warn('sfx', e); }
   }
   function vib(p) { if (settings.effects === false) return; try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
   function floatLabel(txt, size, color) {
@@ -364,7 +411,7 @@
   function fxCorrect(i) {
     fxStreak++;
     var units = fxUnits(i), n = units.length;
-    sfx(n >= 3 ? 'mega' : n === 2 ? 'combo' : n === 1 ? 'line' : 'ok');
+    sfx(n >= 3 ? 'mega' : n === 2 ? 'combo' : n === 1 ? 'line' : 'ok', G.cur[i]);
     if (settings.effects === false) return;
     if (!n && cells[i] && cells[i].el.animate) cells[i].el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.15)', offset: .4 }, { transform: 'scale(1)' }], { duration: 220 });
     if (n) celebrate(i, units);
