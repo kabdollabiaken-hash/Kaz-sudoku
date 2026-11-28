@@ -7,10 +7,10 @@
   /* shop strings (fallback so the shop never shows raw keys) */
   (function () {
     var F = {
-      zh: { shop: '道具商店', shopTip: '联网对战中最多可用 3 个道具。钻石靠通关赚取。', owned: '拥有', notEnoughGems: '钻石不够', it_hint: '提示卡', it_hintD: '自动填对 1 格，并造成伤害', it_shield: '护盾', it_shieldD: '挡住下一次受到的攻击', it_heal: '回血药', it_healD: '恢复 30 点血量', it_freeze: '冰冻', it_freezeD: '对手 4 秒内无法输入' },
-      en: { shop: 'Item shop', shopTip: 'Up to 3 items per online battle. Earn gems by winning games.', owned: 'Owned', notEnoughGems: 'Not enough gems', it_hint: 'Hint card', it_hintD: 'Fills one correct cell and deals damage', it_shield: 'Shield', it_shieldD: 'Blocks the next incoming hit', it_heal: 'Heal potion', it_healD: 'Restores 30 HP', it_freeze: 'Freeze', it_freezeD: 'Opponent cannot input for 4 seconds' },
-      ru: { shop: 'Магазин', shopTip: 'До 3 предметов за онлайн-бой. Кристаллы дают за победы.', owned: 'Есть', notEnoughGems: 'Не хватает кристаллов', it_hint: 'Подсказка', it_hintD: 'Ставит верную цифру и наносит урон', it_shield: 'Щит', it_shieldD: 'Блокирует следующий удар', it_heal: 'Лечение', it_healD: '+30 здоровья', it_freeze: 'Заморозка', it_freezeD: 'Соперник не может вводить 4 секунды' },
-      kk: { shop: 'Дүкен', shopTip: 'Онлайн шайқаста 3 затқа дейін. Гемдерді жеңіспен табасыз.', owned: 'Бар', notEnoughGems: 'Гем жеткіліксіз', it_hint: 'Кеңес картасы', it_hintD: 'Бір ұяшықты дұрыс толтырып, зақым келтіреді', it_shield: 'Қалқан', it_shieldD: 'Келесі соққыны тоқтатады', it_heal: 'Дәрі', it_healD: '30 өмір қосады', it_freeze: 'Мұздату', it_freezeD: 'Қарсылас 4 секунд енгізе алмайды' }
+      zh: { shop: '道具商店', shopTip: '联网对战中最多可用 3 个道具。钻石靠通关赚取。', owned: '拥有', notEnoughGems: '钻石不够', it_hint: '提示卡', it_hintD: '自动填对 1 格，并造成伤害', it_shield: '护盾', it_shieldD: '挡住下一次受到的攻击', it_heal: '回血药', it_healD: '恢复 30 点血量', it_freeze: '冰冻', it_freezeD: '对手 4 秒内无法输入', it_bomb: '炸弹', it_bombD: '炸飞对手一个宫格已填的数字，并扣 6 血', it_smoke: '烟雾弹', it_smokeD: '对手一个宫格被浓雾遮住 8 秒' },
+      en: { shop: 'Item shop', shopTip: 'Up to 3 items per online battle. Earn gems by winning games.', owned: 'Owned', notEnoughGems: 'Not enough gems', it_hint: 'Hint card', it_hintD: 'Fills one correct cell and deals damage', it_shield: 'Shield', it_shieldD: 'Blocks the next incoming hit', it_heal: 'Heal potion', it_healD: 'Restores 30 HP', it_freeze: 'Freeze', it_freezeD: 'Opponent cannot input for 4 seconds', it_bomb: 'Bomb', it_bombD: 'Wipes the opponent\'s filled digits in one box, -6 HP', it_smoke: 'Smoke bomb', it_smokeD: 'Covers one opponent box in fog for 8s' },
+      ru: { shop: 'Магазин', shopTip: 'До 3 предметов за онлайн-бой. Кристаллы дают за победы.', owned: 'Есть', notEnoughGems: 'Не хватает кристаллов', it_hint: 'Подсказка', it_hintD: 'Ставит верную цифру и наносит урон', it_shield: 'Щит', it_shieldD: 'Блокирует следующий удар', it_heal: 'Лечение', it_healD: '+30 здоровья', it_freeze: 'Заморозка', it_freezeD: 'Соперник не может вводить 4 секунды', it_bomb: 'Бомба', it_bombD: 'Стирает цифры соперника в одном блоке, -6 здоровья', it_smoke: 'Дымовая шашка', it_smokeD: 'Закрывает блок соперника дымом на 8 с' },
+      kk: { shop: 'Дүкен', shopTip: 'Онлайн шайқаста 3 затқа дейін. Гемдерді жеңіспен табасыз.', owned: 'Бар', notEnoughGems: 'Гем жеткіліксіз', it_hint: 'Кеңес картасы', it_hintD: 'Бір ұяшықты дұрыс толтырып, зақым келтіреді', it_shield: 'Қалқан', it_shieldD: 'Келесі соққыны тоқтатады', it_heal: 'Дәрі', it_healD: '30 өмір қосады', it_freeze: 'Мұздату', it_freezeD: 'Қарсылас 4 секунд енгізе алмайды', it_bomb: 'Бомба', it_bombD: 'Қарсылас блогындағы цифрларды өшіреді, -6 өмір', it_smoke: 'Түтін бомбасы', it_smokeD: 'Қарсылас блогын 8 сек түтінмен жабады' }
     };
     Object.keys(F).forEach(function (l) { if (!I.T[l]) return; Object.keys(F[l]).forEach(function (k) { if (!I.T[l][k]) I.T[l][k] = F[l][k]; }); });
   })();
@@ -195,6 +195,8 @@
     $('#pause-overlay').hidden = !G.paused;
     setBattleBars(G.mode === 'battle' ? 100 : 0, G.mode === 'battle' ? 100 : 0);
     renderItemBar();
+    $$('.smoke-ov, .freeze-ov, .blast-ring').forEach(function (e) { e.remove(); });
+    var bw0 = $('#board-wrap'); if (bw0) bw0.classList.remove('shield-on');
     show('game');
     renderAll();
   }
@@ -213,7 +215,7 @@
   }
   function startBattleGame(o) {
     var g = makeGame('battle', o.diff, o.seed);
-    g.battle = o; g.hp = 100; g.oppHp = 100; g.dealt = {};
+    g.battle = o; g.hp = 100; g.oppHp = 100; g.dealt = {}; g.scorch = {}; g.smoke = null; g.shield = false;
     var empt = 0; for (var q = 0; q < g.n * g.n; q++) if (!g.puz[q]) empt++;
     g.base = 50 / Math.max(1, empt); g.ub = 50 / (3 * g.n);
     enterGame(g);
@@ -287,6 +289,7 @@
   function input(v) {
     if (!G || G.finished || G.paused || G.sel === null) return;
     if (G.frozenUntil && Date.now() < G.frozenUntil) return;
+    if (G.sel !== null && smokedAt(G.sel)) return;
     var i = G.sel;
     if (G.puz[i] || v > G.n) return;
     if (v === 0) {
@@ -500,10 +503,10 @@
 
 
   /* ---------- items & shop ---------- */
-  var ITEMS = { hint: { ic: '💡', price: 3 }, shield: { ic: '🛡️', price: 4 }, heal: { ic: '💚', price: 3 }, freeze: { ic: '🧊', price: 5 } };
-  var ITEM_ORDER = ['hint', 'shield', 'heal', 'freeze'], ITEM_LIMIT = 3;
+  var ITEMS = { hint: { ic: '💡', price: 3 }, shield: { ic: '🛡️', price: 4 }, heal: { ic: '💚', price: 3 }, freeze: { ic: '🧊', price: 5 }, bomb: { ic: '💣', price: 6 }, smoke: { ic: '🌫️', price: 4 } };
+  var ITEM_ORDER = ['hint', 'shield', 'heal', 'freeze', 'bomb', 'smoke'], ITEM_LIMIT = 3;
   function itemCount(k) { return (stats.items && stats.items[k]) || 0; }
-  var ITEM_COL = { hint: ['#ffe9a8', '#ffc94d'], shield: ['#cfe6ff', '#7fb6ff'], heal: ['#d3f5dc', '#5fd48a'], freeze: ['#d6f4ff', '#6fd3f2'] };
+  var ITEM_COL = { hint: ['#ffe9a8', '#ffc94d'], shield: ['#cfe6ff', '#7fb6ff'], heal: ['#d3f5dc', '#5fd48a'], freeze: ['#d6f4ff', '#6fd3f2'], bomb: ['#ffd9c2', '#ff7a45'], smoke: ['#e3e8ef', '#9aa7b8'] };
   function renderShop() {
     $('#shop-gems').textContent = stats.gems || 0;
     var box = $('#shop-list'); box.innerHTML = '';
@@ -530,7 +533,7 @@
     ITEM_ORDER.forEach(function (k) {
       var b = el('button', 'item-btn', ITEMS[k].ic); b.type = 'button';
       var n = itemCount(k); b.appendChild(el('i', '', 'x' + n));
-      b.disabled = n <= 0 || G.finished || (G.itemUsed || 0) >= ITEM_LIMIT || (k === 'heal' && G.hp >= 100);
+      b.setAttribute('data-k', k); b.disabled = n <= 0 || G.finished || (G.itemUsed || 0) >= ITEM_LIMIT || (k === 'heal' && G.hp >= 100);
       b.addEventListener('click', function () { useItem(k); });
       bar.appendChild(b);
     });
@@ -546,13 +549,63 @@
         if (!cand.length) return; i = cand[Math.floor(Math.random() * cand.length)];
       }
       place(i, G.sol[i], true); G.sel = i;
-    } else if (k === 'shield') { G.shield = true; floatLabel('🛡️', 40, '#4fc3f7'); }
+    } else if (k === 'shield') { setShield(true); floatLabel('🛡️', 40, '#4fc3f7'); }
     else if (k === 'heal') { G.hp = Math.min(100, G.hp + 30); setBattleBars(G.hp, null); if (G.battle && G.battle.onHp) G.battle.onHp(G.hp); floatLabel('💚 +30', 30, '#3fcf6a'); }
+    else if (k === 'bomb' || k === 'smoke') {
+      var bx = Math.floor(Math.random() * G.n); if (G.battle) { if (k === 'bomb' && G.battle.onBomb) G.battle.onBomb(bx); if (k === 'smoke' && G.battle.onSmoke) G.battle.onSmoke(bx); }
+      var btnEl = $('#item-bar .item-btn[data-k="' + k + '"]'), ob = $('#bb-opp');
+      if (btnEl && ob) { var r1 = btnEl.getBoundingClientRect(), r2 = ob.getBoundingClientRect(); flyEmoji(ITEMS[k].ic, r1.left + r1.width / 2, r1.top, r2.left + r2.width / 2, r2.top + 4, 520, function () { floatLabel(k === 'bomb' ? '💥' : '🌫️', 40, '#ff9f43'); }); }
+    }
     else if (k === 'freeze') { if (G.battle && G.battle.onFreeze) G.battle.onFreeze(4); floatLabel('🧊', 40, '#8fd8ff'); }
     stats.items[k] = itemCount(k) - 1; G.itemUsed = (G.itemUsed || 0) + 1; saveStats(); sfx(k === 'freeze' ? 'combo' : 'line');
     if (k === 'hint') afterMove();
     renderItemBar();
   }
+
+  function setShield(on) { G.shield = !!on; var w = $('#board-wrap'); if (w) w.classList.toggle('shield-on', !!on); }
+  function flyEmoji(emoji, x0, y0, x1, y1, dur, done) {
+    var d = document.createElement('div'); d.textContent = emoji;
+    d.style.cssText = 'position:fixed;left:' + (x0 - 18) + 'px;top:' + (y0 - 18) + 'px;font-size:34px;z-index:997;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35))';
+    document.body.appendChild(d);
+    if (!d.animate) { d.remove(); if (done) done(); return; }
+    var a = d.animate([{ transform: 'translate(0,0) scale(.7) rotate(0deg)' }, { transform: 'translate(' + (x1 - x0) + 'px,' + (y1 - y0) + 'px) scale(1.3) rotate(540deg)' }], { duration: dur, easing: 'cubic-bezier(.2,.8,.3,1)' });
+    a.onfinish = function () { d.remove(); if (done) done(); };
+  }
+  function boxRect(b) {
+    var g = G.geo, n = G.n, r0 = 99, r1 = -1, c0 = 99, c1 = -1;
+    for (var k = 0; k < n * n; k++) if (g.BOX[k] === b) { r0 = Math.min(r0, g.ROW[k]); r1 = Math.max(r1, g.ROW[k]); c0 = Math.min(c0, g.COL[k]); c1 = Math.max(c1, g.COL[k]); }
+    return { r0: r0, r1: r1, c0: c0, c1: c1 };
+  }
+  function smokedAt(i) { return G && G.smoke && G.smoke.until > Date.now() && G.geo.BOX[i] === G.smoke.box; }
+  function receiveBomb(b) {
+    if (!G || G.finished || G.mode !== 'battle') return;
+    if (G.shield) { setShield(false); floatLabel('🛡️ ✕💣', 30, '#4fc3f7'); sfx('line'); renderItemBar(); return; }
+    var wrap = $('#board-wrap'), r = boxRect(b), n = G.n, cx = (r.c0 + r.c1 + 1) / 2 / n, cy = (r.r0 + r.r1 + 1) / 2 / n, wr = wrap.getBoundingClientRect();
+    flyEmoji('💣', wr.left + wr.width * cx, -30, wr.left + wr.width * cx, wr.top + wr.height * cy, 480, function () {
+      var ring = document.createElement('div'); ring.className = 'blast-ring'; ring.style.left = (cx * 100) + '%'; ring.style.top = (cy * 100) + '%'; wrap.appendChild(ring); setTimeout(function () { ring.remove(); }, 650);
+      var cnt = 0, now = Date.now();
+      for (var k = 0; k < n * n; k++) if (G.geo.BOX[k] === b) { if (!G.puz[k]) { if (G.cur[k]) cnt++; G.cur[k] = 0; G.notes[k] = 0; } else G.scorch[k] = now + 6000; }
+      G.hist = [];
+      if (settings.effects !== false) { flash('rgba(255,120,40,.4)'); var bd = $('#board'); if (bd && bd.animate) bd.animate([{ transform: 'translate(0,0)' }, { transform: 'translate(-8px,6px) rotate(-1.2deg)' }, { transform: 'translate(8px,-5px) rotate(1.2deg)' }, { transform: 'translate(-5px,-4px)' }, { transform: 'translate(0,0)' }], { duration: 420 }); floatLabel('💥 BOOM -' + cnt, 30, '#ff5a2a'); }
+      sfx('mega'); vib([80, 40, 80]); renderAll();
+      setTimeout(function () { if (G && !G.finished) renderAll(); }, 6100);
+      G.hp = Math.max(0, G.hp - 6); setBattleBars(G.hp, null); if (G.battle && G.battle.onHp) G.battle.onHp(G.hp); if (G.hp <= 0) ko();
+    });
+  }
+  function receiveSmoke(b) {
+    if (!G || G.finished || G.mode !== 'battle') return;
+    if (G.shield) { setShield(false); floatLabel('🛡️ ✕🌫️', 30, '#4fc3f7'); sfx('line'); renderItemBar(); return; }
+    var wrap = $('#board-wrap'), r = boxRect(b), n = G.n;
+    $$('.smoke-ov').forEach(function (e) { e.remove(); });
+    var ov = el('div', 'smoke-ov'); ov.style.left = (r.c0 / n * 100) + '%'; ov.style.top = (r.r0 / n * 100) + '%'; ov.style.width = ((r.c1 - r.c0 + 1) / n * 100) + '%'; ov.style.height = ((r.r1 - r.r0 + 1) / n * 100) + '%';
+    ov.appendChild(el('span', '', '🌫️'));
+    G.smoke = { box: b, until: Date.now() + 8000, taps: 2 };
+    var sm = G.smoke;
+    ov.addEventListener('click', function (e) { e.stopPropagation(); sm.taps--; ov.style.opacity = sm.taps > 0 ? '.55' : '0'; if (sm.taps <= 0) { sm.until = 0; setTimeout(function () { ov.remove(); }, 250); sfx('ok'); } });
+    wrap.appendChild(ov); sfx('combo'); vib(60);
+    setTimeout(function () { if (G && G.smoke === sm) { sm.until = 0; } ov.style.opacity = '0'; setTimeout(function () { ov.remove(); }, 300); }, 8000);
+  }
+
   function receiveFreeze(sec) {
     if (!G || G.finished || G.mode !== 'battle') return;
     G.frozenUntil = Date.now() + (sec || 4) * 1000;
@@ -577,7 +630,7 @@
   }
   function receiveHit(d) {
     if (!G || G.finished || G.mode !== 'battle') return;
-    if (G.shield) { G.shield = false; floatLabel('🛡️ 0', 30, '#4fc3f7'); sfx('line'); renderItemBar(); return; }
+    if (G.shield) { setShield(false); floatLabel('🛡️ 0', 30, '#4fc3f7'); sfx('line'); renderItemBar(); return; }
     G.hp = Math.max(0, G.hp - (d | 0)); setBattleBars(G.hp, null);
     if (settings.effects !== false) { flash('rgba(255,40,40,.35)'); var b = $('#board'); if (b && b.animate) b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 240 }); floatLabel('💔 -' + (d | 0), 28, '#ff4d42'); }
     sfx('bad'); vib(50);
@@ -699,6 +752,7 @@
         if (i !== sel && selVal && v === selVal && settings.highlightSame) cls += ' same';
       }
       if (settings.showErrors && v && !G.puz[i] && v !== G.sol[i]) cls += ' err';
+      if (G.scorch && G.scorch[i] > Date.now()) cls += ' scorch';
       if (v && v === G.sol[i]) counts[v]++;
       c.el.className = cls;
       c.v.textContent = v ? v : '';
@@ -850,7 +904,7 @@
     t: t, show: show, toast: toast, showInfo: showInfo, closeModal: closeModal, fmt: fmt, el: el,
     startBattleGame: startBattleGame, awardBattle: awardBattle,
     setOppHp: function (h) { if (G && G.mode === 'battle') { G.oppHp = h | 0; setBattleBars(null, G.oppHp); } },
-    receiveHit: receiveHit, receiveFreeze: receiveFreeze,
+    receiveHit: receiveHit, receiveFreeze: receiveFreeze, receiveBomb: receiveBomb, receiveSmoke: receiveSmoke,
     winByKo: function () { if (G && G.mode === 'battle' && !G.finished) finish(); },
     freeze: function () { if (G) { tick(); G.finished = true; renderAll(); } },
     getSettings: function () { return settings; },
