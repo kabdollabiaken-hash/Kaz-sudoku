@@ -108,6 +108,10 @@
   Object.assign(T.en, { shareRoom: '📤 Share with a friend', shareText: 'Play Sudoku battle with me! Room {code}, tap the link to join:' });
   Object.assign(T.ru, { shareRoom: '📤 Поделиться с другом', shareText: 'Сыграем в судоку! Комната {code}, нажмите ссылку:' });
   Object.assign(T.kk, { shareRoom: '📤 Досқа жіберу', shareText: 'Менімен судоку ойнайық! Бөлме {code}, сілтемені басыңыз:' });
+  Object.assign(T.zh, { shop: '道具商店', shopTip: '联网对战中最多可用 3 个道具。钻石靠通关赚取。', owned: '拥有', notEnoughGems: '钻石不够', it_hint: '提示卡', it_hintD: '自动填对 1 格，并造成伤害', it_shield: '护盾', it_shieldD: '挡住下一次受到的攻击', it_heal: '回血药', it_healD: '恢复 30 点血量', it_freeze: '冰冻', it_freezeD: '对手 4 秒内无法输入' });
+  Object.assign(T.en, { shop: 'Item shop', shopTip: 'Up to 3 items per online battle. Earn gems by winning games.', owned: 'Owned', notEnoughGems: 'Not enough gems', it_hint: 'Hint card', it_hintD: 'Fills one correct cell and deals damage', it_shield: 'Shield', it_shieldD: 'Blocks the next incoming hit', it_heal: 'Heal potion', it_healD: 'Restores 30 HP', it_freeze: 'Freeze', it_freezeD: 'Opponent cannot input for 4 seconds' });
+  Object.assign(T.ru, { shop: 'Магазин', shopTip: 'До 3 предметов за онлайн-бой. Кристаллы дают за победы.', owned: 'Есть', notEnoughGems: 'Не хватает кристаллов', it_hint: 'Подсказка', it_hintD: 'Ставит верную цифру и наносит урон', it_shield: 'Щит', it_shieldD: 'Блокирует следующий удар', it_heal: 'Лечение', it_healD: '+30 здоровья', it_freeze: 'Заморозка', it_freezeD: 'Соперник не может вводить 4 секунды' });
+  Object.assign(T.kk, { shop: 'Дүкен', shopTip: 'Онлайн шайқаста 3 затқа дейін. Гемдерді жеңіспен табасыз.', owned: 'Бар', notEnoughGems: 'Гем жеткіліксіз', it_hint: 'Кеңес картасы', it_hintD: 'Бір ұяшықты дұрыс толтырып, зақым келтіреді', it_shield: 'Қалқан', it_shieldD: 'Келесі соққыны тоқтатады', it_heal: 'Дәрі', it_healD: '30 өмір қосады', it_freeze: 'Мұздату', it_freezeD: 'Қарсылас 4 секунд енгізе алмайды' });
   var cur = 'en';
 
   function detect() {
