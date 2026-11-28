@@ -318,6 +318,12 @@
       $('#on-code').addEventListener('input', function (e) { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
       $('#on-start').addEventListener('click', hostStart);
       $('#on-back').addEventListener('click', function () { leaveRoom(); closeLobby(); A.show('home'); });
+      $('#on-share').addEventListener('click', function () {
+        var link = location.origin + location.pathname + '?room=' + L.code, text = t('shareText').replace('{code}', L.code);
+        if (navigator.share) navigator.share({ title: t('title'), text: text, url: link }).catch(function () {});
+        else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text + ' ' + link).then(function () { A.toast(t('copied')); }, function () { window.prompt(t('copyLink'), link); });
+        else window.prompt(t('copyLink'), link);
+      });
       $('#on-copy').addEventListener('click', function () {
         var link = location.origin + location.pathname + '?room=' + L.code;
         function done() { A.toast(t('copied')); }
