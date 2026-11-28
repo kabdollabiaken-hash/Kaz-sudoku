@@ -81,11 +81,71 @@
   }
 
   /* ---------- battle lobby ---------- */
-  var L = { ch: null, code: '', host: false, id: '', diff: 'medium', metas: [], inGame: false, myDone: false, mySecs: 0, cd: null, joinTimer: null, bound: false };
+  var L = { pub: false, quick: false, pubOn: false, ch: null, code: '', host: false, id: '', diff: 'medium', metas: [], inGame: false, myDone: false, mySecs: 0, cd: null, joinTimer: null, bound: false };
   var ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   function randomCode() { var s = ''; for (var i = 0; i < 5; i++) s += ALPHA.charAt(Math.floor(Math.random() * ALPHA.length)); return s; }
   function randomId() { return Math.random().toString(36).slice(2, 10); }
   function myName() { return A.displayName(); }
+
+  /* ---------- public lobby (open rooms + quick match) ---------- */
+  var LB = { ch: null, id: randomId(), rooms: [], synced: false, p: null };
+  function ensureLobby() {
+    if (LB.ch) return Promise.resolve(LB.ch);
+    if (LB.p) return LB.p;
+    LB.p = loadSB().then(function (sb) {
+      return new Promise(function (resolve) {
+        var ch = sb.channel('sudoku-lobby', { config: { presence: { key: LB.id } } });
+        LB.ch = ch;
+        ch.on('presence', { event: 'sync' }, function () {
+          var st = ch.presenceState(), out = [];
+          Object.keys(st).forEach(function (k) { st[k].forEach(function (m) { if (m && m.code) out.push(m); }); });
+          LB.rooms = out; LB.synced = true; renderRooms(); lobbyMatchCheck();
+        });
+        ch.subscribe(function (s) { if (s === 'SUBSCRIBED') resolve(ch); });
+        setTimeout(function () { resolve(ch); }, 4000);
+      });
+    }).catch(function () { LB.p = null; return null; });
+    return LB.p;
+  }
+  function closeLobby() { var ch = LB.ch; LB.ch = null; LB.p = null; LB.rooms = []; LB.synced = false; if (ch && client) { try { client.removeChannel(ch); } catch (e) {} } L.pubOn = false; }
+  function publish() {
+    if (L.pubOn || !L.ch || !L.host) return; L.pubOn = true;
+    ensureLobby().then(function (ch) { if (ch && L.pubOn && L.ch) { try { ch.track({ code: L.code, diff: L.diff, name: myName(), id: L.id }); } catch (e) {} } });
+  }
+  function unpublish() { if (!L.pubOn) return; L.pubOn = false; if (LB.ch) { try { LB.ch.untrack(); } catch (e) {} } }
+  function openRooms(diff) { return LB.rooms.filter(function (r) { return r.id !== L.id && (!diff || r.diff === diff); }); }
+  function renderRooms() {
+    var box = $('#on-rooms'); if (!box) return; box.innerHTML = '';
+    var list = openRooms();
+    if (!list.length) { var e = document.createElement('div'); e.className = 'muted center-note'; e.textContent = t('noPublic'); box.appendChild(e); return; }
+    list.slice(0, 8).forEach(function (r) {
+      var row = document.createElement('div'); row.className = 'room-row';
+      var a = document.createElement('span'); a.className = 'rn'; a.textContent = (r.name || '?');
+      var b = document.createElement('span'); b.className = 'rd'; b.textContent = t(r.diff);
+      var c = document.createElement('button'); c.type = 'button'; c.className = 'btn primary small'; c.textContent = t('join');
+      c.addEventListener('click', function () { joinChannel(r.code, false); });
+      row.appendChild(a); row.appendChild(b); row.appendChild(c); box.appendChild(row);
+    });
+  }
+  // two people quick-matching at once: the one with the larger code joins the other
+  function lobbyMatchCheck() {
+    if (!L.quick || !L.host || !L.ch || oppMeta()) return;
+    var other = openRooms(L.diff).filter(function (r) { return r.code < L.code; }).sort(function (a, b) { return a.code < b.code ? -1 : 1; })[0];
+    if (other) { A.toast(t('matched')); joinChannel(other.code, false); }
+  }
+  function quickMatch() {
+    if (!configured()) { A.toast(t('notConfigured')); return; }
+    setMsg(t('searching'));
+    ensureLobby().then(function () {
+      var wait = LB.synced ? 0 : 1200;
+      setTimeout(function () {
+        var r = openRooms(L.diff)[0] || openRooms()[0];
+        setMsg('');
+        if (r) { L.diff = r.diff; joinChannel(r.code, false); }
+        else joinChannel(randomCode(), true, { pub: true, quick: true });
+      }, wait);
+    });
+  }
 
   function setMsg(text) { var m = $('#on-msg'); m.hidden = !text; m.textContent = text || ''; }
   function showPanel(which) { $('#on-menu').hidden = which !== 'menu'; $('#on-lobby').hidden = which !== 'lobby'; }
@@ -101,6 +161,7 @@
     $('#on-roomdiff').textContent = t('chooseDiff') + ': ' + t(L.diff);
     var opp = oppMeta();
     if (L.host) {
+      if (L.pub) { if (opp) unpublish(); else publish(); }
       if (opp) { setStatus('✓ ' + t('opponentJoined') + ': ' + (opp.name || ''), false); $('#on-start').hidden = false; }
       else { setStatus(t('waiting'), false); $('#on-start').hidden = true; }
     } else {
@@ -117,14 +178,16 @@
 
   function leaveRoom() {
     clearInterval(L.cd); L.cd = null; clearTimeout(L.joinTimer);
+    unpublish(); L.quick = false;
     var ch = L.ch; L.ch = null; L.inGame = false; L.myDone = false; L.metas = [];
     if (ch && client) { try { client.removeChannel(ch); } catch (e) {} }
     setMsg(''); setStatus('', false); $('#on-start').hidden = true; showPanel('menu');
   }
 
-  function joinChannel(code, host) {
+  function joinChannel(code, host, opts) {
     if (!configured()) { A.toast(t('notConfigured')); return; }
     leaveRoom();
+    L.pub = !!(opts && opts.pub); L.quick = !!(opts && opts.quick);
     setMsg(t('connecting'));
     loadSB().then(function (sb) {
       L.id = randomId(); L.code = code; L.host = host;
@@ -150,7 +213,8 @@
           setMsg(''); showPanel('lobby');
           $('#on-roomcode').textContent = code;
           $('#on-roomdiff').textContent = t('chooseDiff') + ': ' + t(L.diff);
-          setStatus(host ? t('waiting') : t('connecting'), false);
+          setStatus(host ? (L.quick ? t('searching') : t('waiting')) : t('connecting'), false);
+          if (host && L.pub) publish();
           if (!host) L.joinTimer = setTimeout(checkJoin, 1600);
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           leaveRoom(); setMsg(t('submitFail'));
@@ -244,7 +308,8 @@
           $$('#on-diffs button').forEach(function (x) { x.classList.toggle('on', x === b); });
         });
       });
-      $('#on-create').addEventListener('click', function () { joinChannel(randomCode(), true); });
+      $('#on-create').addEventListener('click', function () { joinChannel(randomCode(), true, { pub: $('#on-pub').checked }); });
+      $('#on-quick').addEventListener('click', quickMatch);
       $('#on-join').addEventListener('click', function () {
         var code = $('#on-code').value.trim().toUpperCase();
         if (!/^[A-Z0-9]{5}$/.test(code)) { A.toast(t('enterCode')); return; }
@@ -252,7 +317,7 @@
       });
       $('#on-code').addEventListener('input', function (e) { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
       $('#on-start').addEventListener('click', hostStart);
-      $('#on-back').addEventListener('click', function () { leaveRoom(); A.show('home'); });
+      $('#on-back').addEventListener('click', function () { leaveRoom(); closeLobby(); A.show('home'); });
       $('#on-copy').addEventListener('click', function () {
         var link = location.origin + location.pathname + '?room=' + L.code;
         function done() { A.toast(t('copied')); }
@@ -261,6 +326,7 @@
       });
     }
     if (!L.ch) { setMsg(''); showPanel('menu'); }
+    if (configured()) { ensureLobby().then(renderRooms); renderRooms(); }
   }
 
   function handleUrl() {
