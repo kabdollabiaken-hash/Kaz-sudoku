@@ -104,6 +104,10 @@
   Object.assign(T.en, { sfxSound: 'Sound', sfxSoundD: 'Sounds for moves, mistakes and completions', sfxFx: 'Effects & vibration', sfxFxD: 'Animations when a row, column or box is done' });
   Object.assign(T.ru, { sfxSound: 'Звуки', sfxSoundD: 'Звуки ходов, ошибок и завершений', sfxFx: 'Эффекты и вибрация', sfxFxD: 'Анимации при завершении строки, столбца, блока' });
   Object.assign(T.kk, { sfxSound: 'Дыбыс', sfxSoundD: 'Жүріс, қате және аяқтау дыбыстары', sfxFx: 'Эффект және діріл', sfxFxD: 'Жол, баған, блок аяқталғандағы анимация' });
+  Object.assign(T.zh, { shareRoom: '📤 分享给好友', shareText: '来跟我玩数独对战！房间号 {code}，点链接直接加入：' });
+  Object.assign(T.en, { shareRoom: '📤 Share with a friend', shareText: 'Play Sudoku battle with me! Room {code}, tap the link to join:' });
+  Object.assign(T.ru, { shareRoom: '📤 Поделиться с другом', shareText: 'Сыграем в судоку! Комната {code}, нажмите ссылку:' });
+  Object.assign(T.kk, { shareRoom: '📤 Досқа жіберу', shareText: 'Менімен судоку ойнайық! Бөлме {code}, сілтемені басыңыз:' });
   var cur = 'en';
 
   function detect() {
