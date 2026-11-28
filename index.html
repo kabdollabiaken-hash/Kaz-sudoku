@@ -43,7 +43,7 @@
   <!-- HOME -->
   <section id="screen-home" class="screen active">
     <header class="top">
-      <div class="ttl"><h1 data-i18n="title">Sudoku</h1><div class="pills"><span id="streak-pill" class="pill-flame"><svg class="ic"><use href="#i-flame"/></svg><span id="streak-txt"></span></span><span class="pill-gem">💎 <b id="gem-txt">0</b></span></div></div>
+      <div class="ttl"><h1 data-i18n="title">Sudoku</h1><div class="pills"><span id="streak-pill" class="pill-flame"><svg class="ic"><use href="#i-flame"/></svg><span id="streak-txt"></span></span><button id="btn-shop" class="pill-gem" type="button">💎 <b id="gem-txt">0</b> 🛒</button></div></div>
       <div class="top-actions">
         <div class="lang-wrap"><button id="btn-lang" class="chip" type="button" aria-haspopup="listbox" aria-expanded="false"><svg class="ic"><use href="#i-globe"/></svg><span id="lang-label"></span><svg class="ic chev"><use href="#i-chevd"/></svg></button><div id="lang-menu" class="lang-menu" role="listbox" hidden></div></div>
         <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings"><svg class="ic"><use href="#i-gear"/></svg></button>
@@ -121,7 +121,21 @@
       <button id="t-notes" class="tool" type="button"><span class="ti">✎</span><span data-i18n="notes">Notes</span></button>
       <button id="t-hint" class="tool" type="button"><span class="ti">💡</span><span data-i18n="hint">Hint</span></button>
     </div>
+    <div id="item-bar" hidden></div>
     <div id="pad" class="pad"></div>
+  </section>
+
+  <!-- SHOP -->
+  <section id="screen-shop" class="screen">
+    <header class="top">
+      <button id="shop-back" class="icon-btn" type="button" aria-label="Back">←</button>
+      <h2 data-i18n="shop">Shop</h2>
+      <span class="pill-gem static">💎 <b id="shop-gems">0</b></span>
+    </header>
+    <div class="page">
+      <div class="notice" data-i18n="shopTip"></div>
+      <div id="shop-list" class="shop-list"></div>
+    </div>
   </section>
 
   <!-- ONLINE LOBBY -->
