@@ -21,7 +21,7 @@
   if (!settings.playerId) { settings.playerId = newPlayerId(); LS.set('sdk_settings', settings); }
   function displayName() { return (settings.name || '').trim().slice(0, 20) || settings.playerId; }
   function ico(id, cls) { return '<svg class="ic ' + (cls || '') + '"><use href="#' + id + '"/></svg>'; }
-  var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {}, gems: 0, car: 0, easyDay: '', easyN: 0 }, LS.get('sdk_stats', {}));
+  var stats = Object.assign({ wins: { easy: 0, medium: 0, hard: 0 }, best: {}, streak: 0, lastDaily: '', dailyDone: {}, gems: 0, items: {}, car: 0, easyDay: '', easyN: 0 }, LS.get('sdk_stats', {}));
   if (stats.sz !== 2) { stats.sz = 2; stats.best = {}; stats.wins = { easy: 0, medium: 0, hard: 0 }; LS.set('sdk_stats', stats); LS.del('sdk_save'); }
   function saveSettings() { LS.set('sdk_settings', settings); }
   function saveStats() { LS.set('sdk_stats', stats); }
@@ -81,6 +81,7 @@
     $$('.screen').forEach(function (s) { s.classList.toggle('active', s.id === 'screen-' + name); });
     var scr = $('#screen-' + name); if (scr) scr.scrollTop = 0;
     if (name === 'home') renderHome();
+    if (name === 'shop') renderShop();
     if (name === 'board' && window.Online) window.Online.renderBoard();
   }
 
@@ -182,6 +183,7 @@
     $('#g-pause').innerHTML = ico(G.paused ? 'i-play' : 'i-pause');
     $('#pause-overlay').hidden = !G.paused;
     setBattleBars(G.mode === 'battle' ? 100 : 0, G.mode === 'battle' ? 100 : 0);
+    renderItemBar();
     show('game');
     renderAll();
   }
@@ -273,6 +275,7 @@
 
   function input(v) {
     if (!G || G.finished || G.paused || G.sel === null) return;
+    if (G.frozenUntil && Date.now() < G.frozenUntil) return;
     var i = G.sel;
     if (G.puz[i] || v > G.n) return;
     if (v === 0) {
@@ -484,6 +487,65 @@
     if (!noWinCheck && isSolved()) finish();
   }
 
+
+  /* ---------- items & shop ---------- */
+  var ITEMS = { hint: { ic: '💡', price: 3 }, shield: { ic: '🛡️', price: 4 }, heal: { ic: '💚', price: 3 }, freeze: { ic: '🧊', price: 5 } };
+  var ITEM_ORDER = ['hint', 'shield', 'heal', 'freeze'], ITEM_LIMIT = 3;
+  function itemCount(k) { return (stats.items && stats.items[k]) || 0; }
+  function renderShop() {
+    $('#shop-gems').textContent = stats.gems || 0;
+    var box = $('#shop-list'); box.innerHTML = '';
+    ITEM_ORDER.forEach(function (k) {
+      var it = ITEMS[k], row = el('div', 'shop-row');
+      row.appendChild(el('div', 'shop-ic', it.ic));
+      var mid = el('div', 'shop-mid'); mid.appendChild(el('b', '', t('it_' + k))); mid.appendChild(el('small', '', t('it_' + k + 'D'))); mid.appendChild(el('small', 'own', t('owned') + ': ' + itemCount(k)));
+      row.appendChild(mid);
+      var b = el('button', 'btn primary small', '💎 ' + it.price); b.type = 'button'; b.disabled = (stats.gems || 0) < it.price;
+      b.addEventListener('click', function () {
+        if ((stats.gems || 0) < it.price) { toast(t('notEnoughGems')); return; }
+        stats.gems -= it.price; stats.items = stats.items || {}; stats.items[k] = itemCount(k) + 1; saveStats(); renderGems(); renderShop(); sfx('streak'); toast(it.ic + ' +1');
+      });
+      row.appendChild(b); box.appendChild(row);
+    });
+  }
+  function renderItemBar() {
+    var bar = $('#item-bar'); if (!bar) return;
+    if (!G || G.mode !== 'battle') { bar.hidden = true; return; }
+    bar.hidden = false; bar.innerHTML = '';
+    ITEM_ORDER.forEach(function (k) {
+      var b = el('button', 'item-btn', ITEMS[k].ic); b.type = 'button';
+      var n = itemCount(k); b.appendChild(el('i', '', 'x' + n));
+      b.disabled = n <= 0 || G.finished || (G.itemUsed || 0) >= ITEM_LIMIT || (k === 'heal' && G.hp >= 100);
+      b.addEventListener('click', function () { useItem(k); });
+      bar.appendChild(b);
+    });
+    var c = el('span', 'item-left', (ITEM_LIMIT - (G.itemUsed || 0)) + '/' + ITEM_LIMIT); bar.appendChild(c);
+  }
+  function useItem(k) {
+    if (!G || G.mode !== 'battle' || G.finished || itemCount(k) <= 0 || (G.itemUsed || 0) >= ITEM_LIMIT) return;
+    if (k === 'heal' && G.hp >= 100) return;
+    if (k === 'hint') {
+      var i = G.sel, cand = [];
+      if (i === null || G.puz[i] || G.cur[i] === G.sol[i]) {
+        for (var q = 0; q < G.n * G.n; q++) if (!G.puz[q] && G.cur[q] !== G.sol[q]) cand.push(q);
+        if (!cand.length) return; i = cand[Math.floor(Math.random() * cand.length)];
+      }
+      place(i, G.sol[i], true); G.sel = i;
+    } else if (k === 'shield') { G.shield = true; floatLabel('🛡️', 40, '#4fc3f7'); }
+    else if (k === 'heal') { G.hp = Math.min(100, G.hp + 30); setBattleBars(G.hp, null); if (G.battle && G.battle.onHp) G.battle.onHp(G.hp); floatLabel('💚 +30', 30, '#3fcf6a'); }
+    else if (k === 'freeze') { if (G.battle && G.battle.onFreeze) G.battle.onFreeze(4); floatLabel('🧊', 40, '#8fd8ff'); }
+    stats.items[k] = itemCount(k) - 1; G.itemUsed = (G.itemUsed || 0) + 1; saveStats(); sfx(k === 'freeze' ? 'combo' : 'line');
+    if (k === 'hint') afterMove();
+    renderItemBar();
+  }
+  function receiveFreeze(sec) {
+    if (!G || G.finished || G.mode !== 'battle') return;
+    G.frozenUntil = Date.now() + (sec || 4) * 1000;
+    var wrap = $('#board-wrap'); if (!wrap) return;
+    var ov = el('div', 'freeze-ov', '🧊'); wrap.appendChild(ov); sfx('mega'); vib(80);
+    setTimeout(function () { ov.remove(); }, (sec || 4) * 1000);
+  }
+
   /* ---- battle HP ---- */
   function hpColor(h) { return h > 60 ? '#3fcf6a' : h > 30 ? '#f2c14e' : '#ee5a50'; }
   function ko() {
@@ -500,6 +562,7 @@
   }
   function receiveHit(d) {
     if (!G || G.finished || G.mode !== 'battle') return;
+    if (G.shield) { G.shield = false; floatLabel('🛡️ 0', 30, '#4fc3f7'); sfx('line'); renderItemBar(); return; }
     G.hp = Math.max(0, G.hp - (d | 0)); setBattleBars(G.hp, null);
     if (settings.effects !== false) { flash('rgba(255,40,40,.35)'); var b = $('#board'); if (b && b.animate) b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 240 }); floatLabel('💔 -' + (d | 0), 28, '#ff4d42'); }
     sfx('bad'); vib(50);
@@ -703,6 +766,8 @@
     $('#lang-menu').addEventListener('click', function (e) { e.stopPropagation(); });
     document.addEventListener('click', closeLangMenu);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLangMenu(); });
+    $('#btn-shop').addEventListener('click', function () { show('shop'); });
+    $('#shop-back').addEventListener('click', function () { show('home'); });
     $('#btn-settings').addEventListener('click', function () { renderSettings(); $('#modal-settings').classList.add('open'); });
     $('#set-close').addEventListener('click', function () { $('#modal-settings').classList.remove('open'); });
     $('#modal-settings').addEventListener('click', function (e) { if (e.target.id === 'modal-settings') e.target.classList.remove('open'); });
@@ -770,7 +835,7 @@
     t: t, show: show, toast: toast, showInfo: showInfo, closeModal: closeModal, fmt: fmt, el: el,
     startBattleGame: startBattleGame, awardBattle: awardBattle,
     setOppHp: function (h) { if (G && G.mode === 'battle') { G.oppHp = h | 0; setBattleBars(null, G.oppHp); } },
-    receiveHit: receiveHit,
+    receiveHit: receiveHit, receiveFreeze: receiveFreeze,
     winByKo: function () { if (G && G.mode === 'battle' && !G.finished) finish(); },
     freeze: function () { if (G) { tick(); G.finished = true; renderAll(); } },
     getSettings: function () { return settings; },
