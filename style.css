@@ -286,7 +286,3 @@ input.sw:checked::after { transform: translateX(20px); }
 .car-bar { height: 8px; border-radius: 4px; background: var(--tile); overflow: hidden; }
 .car-bar i { display: block; height: 100%; background: linear-gradient(90deg, #36a8ff, #6a6cf5); border-radius: 4px; transition: width .4s; }
 .btn.small:disabled { opacity: .45; }
-
-.rc-big.war { background: linear-gradient(100deg, #2f6b4f, #1f4a6e); box-shadow: 0 8px 20px rgba(40, 100, 120, .4); }
-.rc-big.war .pill-btn { color: #1f4a6e; }
-.war-ic { font-size: 30px; line-height: 1; flex: none; }
