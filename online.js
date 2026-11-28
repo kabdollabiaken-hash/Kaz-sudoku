@@ -203,7 +203,9 @@
         updateLobbyUI();
       });
       ch.on('broadcast', { event: 'start' }, function (m) { if (L.ch === ch) onStart(m.payload); });
-      ch.on('broadcast', { event: 'progress' }, function (m) { if (L.ch === ch && L.inGame && m.payload) A.setOppProgress(m.payload.pct | 0); });
+      ch.on('broadcast', { event: 'hit' }, function (m) { if (L.ch === ch && L.inGame && !L.over && m.payload) A.receiveHit(m.payload.dmg | 0); });
+      ch.on('broadcast', { event: 'hp' }, function (m) { if (L.ch === ch && L.inGame && m.payload) A.setOppHp(m.payload.hp | 0); });
+      ch.on('broadcast', { event: 'ko' }, function (m) { if (L.ch === ch) onOppKo(); });
       ch.on('broadcast', { event: 'done' }, function (m) { if (L.ch === ch) onOppDone(m.payload || {}); });
       ch.subscribe(function (status) {
         if (L.ch !== ch) return;
@@ -250,7 +252,7 @@
     if (!p || !p.seed) return;
     A.closeModal();
     clearInterval(L.cd);
-    L.inGame = false; L.myDone = false;
+    L.inGame = false; L.myDone = false; L.over = false;
     A.show('online'); showPanel('lobby');
     $('#on-start').hidden = true;
     $('#on-roomcode').textContent = L.code;
@@ -265,7 +267,9 @@
         if (window.Track) Track.log('battle_start', { mode: 'battle', diff: p.diff });
         A.startBattleGame({
           seed: p.seed, diff: p.diff,
-          onProgress: function (pct, mist) { send('progress', { id: L.id, pct: pct, mist: mist }); },
+          onHit: function (dmg) { send('hit', { id: L.id, dmg: dmg }); },
+          onHp: function (hp) { send('hp', { id: L.id, hp: hp }); },
+          onKo: function (secs) { L.over = true; send('ko', { id: L.id }); showResult(false, secs); },
           onDone: onMyDone,
           onLeave: function () { leaveRoom(); A.show('home'); }
         });
@@ -291,8 +295,12 @@
     if (window.Track) Track.log('battle_win', { mode: 'battle', diff: L.diff, secs: secs });
     showResult(true, secs);
   }
+  function onOppKo() {
+    if (!L.inGame || L.over || L.myDone) return;
+    A.winByKo();
+  }
   function onOppDone(p) {
-    if (!L.inGame) return;
+    if (!L.inGame || L.over) return;
     var oppSecs = p.secs | 0;
     if (!L.myDone) { A.freeze(); showResult(false, oppSecs, oppSecs); }
     else if (oppSecs < L.mySecs) showResult(false, L.mySecs, oppSecs);
