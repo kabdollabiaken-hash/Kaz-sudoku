@@ -3,6 +3,17 @@
   'use strict';
   var C = SudokuCore, I = I18N;
   function t(k) { return I.t(k); }
+
+  /* shop strings (fallback so the shop never shows raw keys) */
+  (function () {
+    var F = {
+      zh: { shop: '道具商店', shopTip: '联网对战中最多可用 3 个道具。钻石靠通关赚取。', owned: '拥有', notEnoughGems: '钻石不够', it_hint: '提示卡', it_hintD: '自动填对 1 格，并造成伤害', it_shield: '护盾', it_shieldD: '挡住下一次受到的攻击', it_heal: '回血药', it_healD: '恢复 30 点血量', it_freeze: '冰冻', it_freezeD: '对手 4 秒内无法输入' },
+      en: { shop: 'Item shop', shopTip: 'Up to 3 items per online battle. Earn gems by winning games.', owned: 'Owned', notEnoughGems: 'Not enough gems', it_hint: 'Hint card', it_hintD: 'Fills one correct cell and deals damage', it_shield: 'Shield', it_shieldD: 'Blocks the next incoming hit', it_heal: 'Heal potion', it_healD: 'Restores 30 HP', it_freeze: 'Freeze', it_freezeD: 'Opponent cannot input for 4 seconds' },
+      ru: { shop: 'Магазин', shopTip: 'До 3 предметов за онлайн-бой. Кристаллы дают за победы.', owned: 'Есть', notEnoughGems: 'Не хватает кристаллов', it_hint: 'Подсказка', it_hintD: 'Ставит верную цифру и наносит урон', it_shield: 'Щит', it_shieldD: 'Блокирует следующий удар', it_heal: 'Лечение', it_healD: '+30 здоровья', it_freeze: 'Заморозка', it_freezeD: 'Соперник не может вводить 4 секунды' },
+      kk: { shop: 'Дүкен', shopTip: 'Онлайн шайқаста 3 затқа дейін. Гемдерді жеңіспен табасыз.', owned: 'Бар', notEnoughGems: 'Гем жеткіліксіз', it_hint: 'Кеңес картасы', it_hintD: 'Бір ұяшықты дұрыс толтырып, зақым келтіреді', it_shield: 'Қалқан', it_shieldD: 'Келесі соққыны тоқтатады', it_heal: 'Дәрі', it_healD: '30 өмір қосады', it_freeze: 'Мұздату', it_freezeD: 'Қарсылас 4 секунд енгізе алмайды' }
+    };
+    Object.keys(F).forEach(function (l) { if (!I.T[l]) return; Object.keys(F[l]).forEach(function (k) { if (!I.T[l][k]) I.T[l][k] = F[l][k]; }); });
+  })();
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   var LS = {
@@ -492,20 +503,24 @@
   var ITEMS = { hint: { ic: '💡', price: 3 }, shield: { ic: '🛡️', price: 4 }, heal: { ic: '💚', price: 3 }, freeze: { ic: '🧊', price: 5 } };
   var ITEM_ORDER = ['hint', 'shield', 'heal', 'freeze'], ITEM_LIMIT = 3;
   function itemCount(k) { return (stats.items && stats.items[k]) || 0; }
+  var ITEM_COL = { hint: ['#ffe9a8', '#ffc94d'], shield: ['#cfe6ff', '#7fb6ff'], heal: ['#d3f5dc', '#5fd48a'], freeze: ['#d6f4ff', '#6fd3f2'] };
   function renderShop() {
     $('#shop-gems').textContent = stats.gems || 0;
     var box = $('#shop-list'); box.innerHTML = '';
     ITEM_ORDER.forEach(function (k) {
-      var it = ITEMS[k], row = el('div', 'shop-row');
-      row.appendChild(el('div', 'shop-ic', it.ic));
-      var mid = el('div', 'shop-mid'); mid.appendChild(el('b', '', t('it_' + k))); mid.appendChild(el('small', '', t('it_' + k + 'D'))); mid.appendChild(el('small', 'own', t('owned') + ': ' + itemCount(k)));
-      row.appendChild(mid);
-      var b = el('button', 'btn primary small', '💎 ' + it.price); b.type = 'button'; b.disabled = (stats.gems || 0) < it.price;
+      var it = ITEMS[k], card = el('div', 'shop-card'), col = ITEM_COL[k];
+      card.style.setProperty('--c1', col[0]); card.style.setProperty('--c2', col[1]);
+      var ic = el('div', 'shop-ic', it.ic); card.appendChild(ic);
+      card.appendChild(el('b', 'shop-name', t('it_' + k)));
+      card.appendChild(el('small', 'shop-desc', t('it_' + k + 'D')));
+      card.appendChild(el('span', 'shop-own', t('owned') + ' ×' + itemCount(k)));
+      var can = (stats.gems || 0) >= it.price, b = el('button', 'shop-buy', '💎 ' + it.price); b.type = 'button'; b.disabled = !can;
       b.addEventListener('click', function () {
         if ((stats.gems || 0) < it.price) { toast(t('notEnoughGems')); return; }
-        stats.gems -= it.price; stats.items = stats.items || {}; stats.items[k] = itemCount(k) + 1; saveStats(); renderGems(); renderShop(); sfx('streak'); toast(it.ic + ' +1');
+        stats.gems -= it.price; stats.items = stats.items || {}; stats.items[k] = itemCount(k) + 1; saveStats(); renderGems(); renderShop(); sfx('streak'); vib(20);
+        var nc = $('#shop-list').children[ITEM_ORDER.indexOf(k)]; if (nc && nc.animate) nc.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: .4 }, { transform: 'scale(1)' }], { duration: 300 });
       });
-      row.appendChild(b); box.appendChild(row);
+      card.appendChild(b); box.appendChild(card);
     });
   }
   function renderItemBar() {
